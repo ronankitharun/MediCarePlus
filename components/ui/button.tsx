@@ -1,4 +1,4 @@
-import React, { type ComponentPropsWithoutRef } from "react"
+import * as React from "react"
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -43,9 +43,12 @@ const buttonVariants = cva(
 )
 
 export interface ButtonProps
-  extends ComponentPropsWithoutRef<"button">,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  className?: string
+  children?: React.ReactNode
+  onClick?: React.MouseEventHandler<HTMLButtonElement>
 }
 
 function Button({

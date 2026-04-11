@@ -5,15 +5,27 @@ import { auth, googleProvider } from '../firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
 import { Button } from '../../components/ui/button';
 import { Heart, User, LogOut, LayoutDashboard, Settings } from 'lucide-react';
+import { toast } from 'sonner';
 
 export const Navbar = () => {
   const { user } = useAuth();
 
   const handleLogin = async () => {
+    console.log('Attempting login...');
     try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error) {
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log('Login successful:', result.user.uid);
+      toast.success('Logged in successfully!');
+    } catch (error: any) {
       console.error('Login error:', error);
+      if (error.code === 'auth/popup-blocked') {
+        toast.error('Login popup was blocked by your browser. Please allow popups for this site.');
+      } else if (error.code === 'auth/unauthorized-domain') {
+        toast.error('This domain is not authorized for Firebase Auth. Please add it to the authorized domains in Firebase Console.');
+        console.error('Unauthorized domain. Current domain:', window.location.hostname);
+      } else {
+        toast.error(`Login failed: ${error.message}`);
+      }
     }
   };
 

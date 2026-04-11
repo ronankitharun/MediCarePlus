@@ -24,10 +24,16 @@ export const DoctorsListing = () => {
     ? DOCTORS 
     : DOCTORS.filter(d => d.departmentId === selectedDept);
 
-  const handleBookClick = (doctor: any) => {
+  const handleBookClick = async (doctor: any) => {
     if (!user) {
-      toast.error('Please login to book an appointment');
-      signInWithPopup(auth, googleProvider);
+      toast.info('Please login to book an appointment');
+      try {
+        await signInWithPopup(auth, googleProvider);
+        toast.success('Logged in! You can now book your appointment.');
+      } catch (error: any) {
+        console.error('Login error:', error);
+        toast.error('Login failed. Please try again.');
+      }
       return;
     }
     setBookingDoctor(doctor);
