@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required)
+    //   - displayName: string
+    //   - role: string (patient, doctor, admin) (required)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: appointments
+    // Document ID: appointmentId
+    // Fields:
+    //   - patientId: string (required)
+    //   - doctorId: string (required)
+    //   - date: string (required)
+    //   - time: string (required)
+    //   - status: string (pending, confirmed, cancelled, completed) (required)
+    //
+    // Collection: reports
+    // Document ID: reportId
+    // Fields:
+    //   - patientId: string (required)
+    //   - title: string (required)
+    //   - fileUrl: string (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+         (request.auth.token.email == "2000030868cse@gmail.com" && request.auth.token.email_verified == true));
+    }
+    
+    function isPatient() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'patient';
+    }
+
+    function isDoctor() {
+      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'doctor';
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(userId) && 
+        (request.resource.data.role == 'patient' || (request.resource.data.role == 'admin' && isAdmin()));
+      allow update: if isAuthenticated() && (isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role));
+    }
+
+    match /appointments/{appointmentId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.patientId || request.auth.uid == resource.data.doctorId || isAdmin());
+      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.patientId || isAdmin());
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.patientId || request.auth.uid == resource.data.doctorId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    match /reports/{reportId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.patientId || isAdmin());
+      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.patientId || isAdmin());
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.patientId || isAdmin());
+      allow delete: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["patient", "doctor", "admin"] },
+        "photoURL": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Medical appointment details",
+      "type": "object",
+      "properties": {
+        "patientId": { "type": "string" },
+        "patientName": { "type": "string" },
+        "doctorId": { "type": "string" },
+        "doctorName": { "type": "string" },
+        "departmentId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "time": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled", "completed"] },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["patientId", "doctorId", "date", "time", "status", "createdAt"]
+    },
+    "Report": {
+      "title": "Report",
+      "description": "Patient medical reports",
+      "type": "object",
+      "properties": {
+        "patientId": { "type": "string" },
+        "title": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "fileName": { "type": "string" },
+        "fileType": { "type": "string" },
+        "uploadedAt": { "type": "string", "format": "date-time" },
+        "description": { "type": "string" }
+      },
+      "required": ["patientId", "title", "fileUrl", "uploadedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile documents"
+    },
+    "/appointments/{appointmentId}": {
+      "schema": "Appointment",
+      "description": "Appointment documents"
+    },
+    "/reports/{reportId}": {
+      "schema": "Report",
+      "description": "Medical report documents"
+    }
+  }
+}
