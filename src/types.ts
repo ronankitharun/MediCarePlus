@@ -40,6 +40,13 @@ export interface Appointment {
   date: string;
   time: string;
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  type: 'online' | 'offline';
+  paymentStatus?: 'pending' | 'paid' | 'failed';
+  paymentId?: string;
+  orderId?: string;
+  amount?: number;
+  patientAge: string;
+  patientPhone: string;
   notes?: string;
   createdAt: string;
 }

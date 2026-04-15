@@ -128,6 +128,16 @@ export const PatientDashboard = () => {
                           <div className="flex flex-col">
                             <span className="text-sm font-medium text-slate-900">{apt.date}</span>
                             <span className="text-xs text-slate-500">{apt.time}</span>
+                            <Badge variant="outline" className={`mt-1 w-fit text-[10px] uppercase ${
+                              apt.type === 'online' ? 'border-blue-200 text-blue-600 bg-blue-50' : 'border-slate-200 text-slate-600 bg-slate-50'
+                            }`}>
+                              {apt.type}
+                            </Badge>
+                            {apt.paymentStatus === 'paid' && (
+                              <Badge variant="outline" className="mt-1 w-fit text-[10px] uppercase border-emerald-200 text-emerald-600 bg-emerald-50">
+                                Paid: ₹{apt.amount}
+                              </Badge>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>

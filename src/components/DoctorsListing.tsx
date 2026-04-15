@@ -19,6 +19,11 @@ export const DoctorsListing = () => {
   const [bookingDoctor, setBookingDoctor] = useState<any>(null);
   const [bookingDate, setBookingDate] = useState<string>('');
   const [bookingTime, setBookingTime] = useState<string>('');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [patientAge, setPatientAge] = useState<string>('');
+  const [patientName, setPatientName] = useState<string>('');
+  const [appointmentType, setAppointmentType] = useState<'online' | 'offline'>('offline');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const filteredDoctors = selectedDept === 'all' 
     ? DOCTORS 
@@ -37,33 +42,129 @@ export const DoctorsListing = () => {
       return;
     }
     setBookingDoctor(doctor);
+    // Pre-fill fields if user is logged in
+    if (user) {
+      setPatientName(user.displayName || '');
+      if (user.phoneNumber) {
+        setPhoneNumber(user.phoneNumber);
+      }
+    }
   };
 
   const handleConfirmBooking = async () => {
-    if (!bookingDate || !bookingTime) {
-      toast.error('Please select both date and time');
+    if (!bookingDate || !bookingTime || !phoneNumber || !patientAge || !patientName) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    // Strict 10-digit phone validation
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      toast.error('Please enter a valid 10-digit phone number');
       return;
     }
 
     try {
+      setIsProcessing(true);
+      
+      let paymentId = 'offline';
+      let orderId = 'offline';
+
+      // Real Payment Flow for Online Appointments
+      if (appointmentType === 'online') {
+        // 1. Create Order on Server
+        const orderRes = await fetch('/api/payment/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: 200 }),
+        });
+        
+        if (!orderRes.ok) throw new Error('Failed to create payment order');
+        const orderData = await orderRes.json();
+
+        // 2. Open Razorpay Checkout
+        const options = {
+          key: (import.meta as any).env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: 'ArogyaLink',
+          description: `Consultation with ${bookingDoctor.name}`,
+          order_id: orderData.id,
+          handler: async (response: any) => {
+            // 3. Verify Payment on Server
+            const verifyRes = await fetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(response),
+            });
+
+            if (verifyRes.ok) {
+              paymentId = response.razorpay_payment_id;
+              orderId = response.razorpay_order_id;
+              await finalizeBooking(paymentId, orderId);
+            } else {
+              toast.error('Payment verification failed');
+              setIsProcessing(false);
+            }
+          },
+          prefill: {
+            name: patientName,
+            contact: phoneNumber,
+            email: user?.email,
+          },
+          theme: { color: '#059669' },
+          modal: {
+            ondismiss: () => setIsProcessing(false),
+          }
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
+        return; // Wait for handler to finalize
+      }
+
+      await finalizeBooking(paymentId, orderId);
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast.error('Failed to process booking');
+      setIsProcessing(false);
+    }
+  };
+
+  const finalizeBooking = async (paymentId: string, orderId: string) => {
+    try {
       await addDoc(collection(db, 'appointments'), {
         patientId: user?.uid,
-        patientName: user?.displayName,
+        patientName: patientName,
+        patientAge: patientAge,
+        patientPhone: phoneNumber,
         doctorId: bookingDoctor.id,
         doctorName: bookingDoctor.name,
         departmentId: bookingDoctor.departmentId,
         date: bookingDate,
         time: bookingTime,
+        type: appointmentType,
+        paymentStatus: appointmentType === 'online' ? 'paid' : 'pending',
+        paymentId,
+        orderId,
+        amount: appointmentType === 'online' ? 200 : 0,
         status: 'pending',
         createdAt: new Date().toISOString(),
       });
+      
       toast.success('Appointment booked successfully!');
       setBookingDoctor(null);
       setBookingDate('');
       setBookingTime('');
+      setPhoneNumber('');
+      setPatientAge('');
+      setPatientName('');
+      setAppointmentType('offline');
     } catch (error) {
-      console.error('Booking error:', error);
-      toast.error('Failed to book appointment');
+      console.error('Finalize error:', error);
+      toast.error('Failed to save appointment');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -180,13 +281,81 @@ export const DoctorsListing = () => {
                 </SelectContent>
               </Select>
             </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-slate-700">Appointment Type</label>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setAppointmentType('offline')}
+                  className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
+                    appointmentType === 'offline'
+                      ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                      : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'
+                  } font-semibold text-sm`}
+                >
+                  In-Person (Offline)
+                </button>
+                <button
+                  onClick={() => setAppointmentType('online')}
+                  className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
+                    appointmentType === 'online'
+                      ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
+                      : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'
+                  } font-semibold text-sm`}
+                >
+                  Call (Online)
+                </button>
+              </div>
+              {appointmentType === 'online' && (
+                <div className="mt-2 p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center justify-between">
+                  <span className="text-sm font-medium text-blue-700">Consultation Fee</span>
+                  <span className="text-lg font-bold text-blue-800">₹200</span>
+                </div>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-slate-700">Patient Name</label>
+                <input 
+                  type="text" 
+                  placeholder="Full Name"
+                  className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  value={patientName}
+                  onChange={(e) => setPatientName(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-slate-700">Age</label>
+                <input 
+                  type="number" 
+                  placeholder="Age"
+                  className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  value={patientAge}
+                  onChange={(e) => setPatientAge(e.target.value)}
+                  min="0"
+                  max="120"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-slate-700">Phone Number</label>
+              <input 
+                type="tel" 
+                placeholder="10-digit phone number"
+                maxLength={10}
+                className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+              />
+              <p className="text-xs text-slate-500">Enter exactly 10 digits (e.g., 9876543210)</p>
+            </div>
           </div>
           <DialogFooter>
             <Button 
               onClick={handleConfirmBooking}
+              disabled={isProcessing}
               className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-6 text-lg font-semibold"
             >
-              Confirm Appointment
+              {isProcessing ? 'Processing...' : appointmentType === 'online' ? 'Pay ₹200 & Confirm' : 'Confirm Appointment'}
             </Button>
           </DialogFooter>
         </DialogContent>

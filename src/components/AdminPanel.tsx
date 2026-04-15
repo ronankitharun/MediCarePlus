@@ -145,7 +145,14 @@ export const AdminPanel = () => {
                   {appointments.map((apt) => (
                     <TableRow key={apt.id} className="hover:bg-slate-50/50">
                       <TableCell className="px-8 py-4">
-                        <span className="font-semibold text-slate-900">{apt.patientName}</span>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-slate-900">{apt.patientName}</span>
+                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <span>Age: {apt.patientAge}</span>
+                            <span>•</span>
+                            <span>{apt.patientPhone}</span>
+                          </div>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <span className="text-slate-600">{apt.doctorName}</span>
@@ -154,6 +161,16 @@ export const AdminPanel = () => {
                         <div className="flex flex-col">
                           <span className="text-sm font-medium text-slate-900">{apt.date}</span>
                           <span className="text-xs text-slate-500">{apt.time}</span>
+                          <Badge variant="outline" className={`mt-1 w-fit text-[10px] uppercase ${
+                            apt.type === 'online' ? 'border-blue-200 text-blue-600 bg-blue-50' : 'border-slate-200 text-slate-600 bg-slate-50'
+                          }`}>
+                            {apt.type}
+                          </Badge>
+                          {apt.paymentStatus === 'paid' && (
+                            <Badge variant="outline" className="mt-1 w-fit text-[10px] uppercase border-emerald-200 text-emerald-600 bg-emerald-50">
+                              Paid: ₹{apt.amount}
+                            </Badge>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
