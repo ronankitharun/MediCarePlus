@@ -17,6 +17,8 @@ export interface Doctor {
   education: string;
   bio: string;
   image: string;
+  hospital?: string;
+  googleMapsUrl?: string;
   availability: {
     [key: string]: string[]; // 'Monday': ['09:00', '10:00']
   };
@@ -60,4 +62,60 @@ export interface Report {
   fileType: string;
   uploadedAt: string;
   description?: string;
+}
+
+export interface Medicine {
+  id: string;
+  name: string;
+  brandName: string;
+  genericName: string;
+  category: 'prescription' | 'otc';
+  composition: string;
+  indications: string;
+  dosage: string;
+  sideEffects: string[];
+  precautions: string[];
+  interactions: string[];
+  manufacturer: string;
+  expiry: string;
+  storage: string;
+  price: number;
+  image: string;
+  prescriptionRequired: boolean;
+  stock: number;
+  symptoms: string[];
+  alternatives?: { id: string; name: string; price: number }[];
+}
+
+export interface CartItem {
+  medicine: Medicine;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  items: { 
+    medicineId: string; 
+    name: string; 
+    quantity: number; 
+    price: number 
+  }[];
+  totalAmount: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  address: {
+    fullName: string;
+    phone: string;
+    street: string;
+    city: string;
+    state: string;
+    pincode: string;
+  };
+  deliverySlot: string;
+  paymentStatus: 'pending' | 'paid' | 'failed';
+  paymentId?: string;
+  razorpayOrderId?: string;
+  createdAt: string;
 }

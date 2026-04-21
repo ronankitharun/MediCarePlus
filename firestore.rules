@@ -79,8 +79,15 @@ service cloud.firestore {
 
     match /reports/{reportId} {
       allow read: if isAuthenticated() && (request.auth.uid == resource.data.patientId || isAdmin());
-      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.patientId || isAdmin());
-      allow update: if isAuthenticated() && (request.auth.uid == resource.data.patientId || isAdmin());
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /pharmacy_orders/{orderId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin());
+      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.userId || request.resource.data.userId == 'anonymous');
+      allow update: if isAdmin();
       allow delete: if isAdmin();
     }
   }

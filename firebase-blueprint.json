@@ -47,6 +47,26 @@
         "description": { "type": "string" }
       },
       "required": ["patientId", "title", "fileUrl", "uploadedAt"]
+    },
+    "PharmacyOrder": {
+      "title": "Pharmacy Order",
+      "description": "Medicine order details",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "items": { "type": "array" },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "processing", "shipped", "delivered", "cancelled"] },
+        "address": { "type": "object" },
+        "deliverySlot": { "type": "string" },
+        "paymentStatus": { "type": "string", "enum": ["pending", "paid", "failed"] },
+        "paymentId": { "type": "string" },
+        "razorpayOrderId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "items", "totalAmount", "status", "address", "createdAt"]
     }
   },
   "firestore": {
@@ -61,6 +81,10 @@
     "/reports/{reportId}": {
       "schema": "Report",
       "description": "Medical report documents"
+    },
+    "/pharmacy_orders/{orderId}": {
+      "schema": "PharmacyOrder",
+      "description": "Medicine order documents"
     }
   }
 }

@@ -4,7 +4,7 @@ import { DOCTORS, DEPARTMENTS } from '../constants';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
-import { Calendar, Clock, MapPin, Star, Filter } from 'lucide-react';
+import { Calendar, Clock, MapPin, Star, Filter, ExternalLink } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import { auth, googleProvider, db } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
@@ -152,6 +152,25 @@ export const DoctorsListing = () => {
         createdAt: new Date().toISOString(),
       });
       
+      // Send Email Notification to Admin
+      try {
+        await fetch('/api/appointments/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            patientName,
+            patientPhone: phoneNumber,
+            doctorName: bookingDoctor.name,
+            date: bookingDate,
+            time: bookingTime,
+            type: appointmentType,
+          }),
+        });
+      } catch (emailError) {
+        console.error('Email notification failed:', emailError);
+        // We don't toast error here because the booking itself was successful
+      }
+
       toast.success('Appointment booked successfully!');
       setBookingDoctor(null);
       setBookingDate('');
@@ -227,13 +246,26 @@ export const DoctorsListing = () => {
               <CardContent className="flex flex-col gap-6">
                 <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">{doctor.bio}</p>
                 <div className="flex flex-col gap-3">
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
-                    <MapPin className="h-4 w-4" />
-                    <span>MediCare Plus Main Hospital</span>
+                  <div className="flex items-center justify-between text-sm text-slate-500">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      <span>{doctor.hospital || 'MediCare Plus Main Hospital'}</span>
+                    </div>
+                    {doctor.googleMapsUrl && (
+                      <a 
+                        href={doctor.googleMapsUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        Maps
+                      </a>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-slate-500">
                     <Clock className="h-4 w-4" />
-                    <span>Available: Mon - Fri</span>
+                    <span>Available: Mon - Sat</span>
                   </div>
                 </div>
                 <Button 

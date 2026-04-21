@@ -1,0 +1,14 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /reports/{userId}/{allPaths=**} {
+      // Allow read access to the patient and admins
+      allow read: if request.auth != null && (request.auth.uid == userId || 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin');
+      
+      // Allow write access only to admins
+      allow write: if request.auth != null && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+  }
+}

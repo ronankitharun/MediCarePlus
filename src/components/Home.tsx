@@ -19,37 +19,37 @@ export const Home = () => {
               className="flex flex-col gap-6"
             >
               <div className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-700">
-                <Shield className="h-4 w-4" />
-                Trusted Healthcare Provider
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                Now Open for Digital Consultations
               </div>
               <h1 className="text-5xl font-extrabold tracking-tight text-slate-900 md:text-6xl lg:text-7xl">
-                Your Health is Our <span className="text-emerald-600">Top Priority</span>
+                Healthcare, <span className="text-emerald-600">Simplified</span> for You
               </h1>
               <p className="text-lg text-slate-600 max-w-lg leading-relaxed">
-                Experience world-class medical care with our expert doctors and state-of-the-art facilities. Book your appointment today and take the first step towards a healthier life.
+                Connect with dedicated medical specialists through a seamless digital experience. ArogyaLink brings quality care to your fingertips with transparent pricing and secure records.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 text-lg rounded-xl shadow-xl shadow-emerald-200">
                   <Link to="/doctors">Book Appointment</Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="px-8 py-6 text-lg rounded-xl border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50">
-                  <Link to="/departments">Our Services</Link>
+                  <Link to="/departments">Explore Services</Link>
                 </Button>
               </div>
               <div className="flex items-center gap-8 pt-4">
                 <div className="flex flex-col">
-                  <span className="text-3xl font-bold text-slate-900">15k+</span>
-                  <span className="text-sm text-slate-500 font-medium">Happy Patients</span>
+                  <span className="text-3xl font-bold text-slate-900">Verified</span>
+                  <span className="text-sm text-slate-500 font-medium">Specialists</span>
                 </div>
                 <div className="h-10 w-px bg-slate-200" />
                 <div className="flex flex-col">
-                  <span className="text-3xl font-bold text-slate-900">150+</span>
-                  <span className="text-sm text-slate-500 font-medium">Expert Doctors</span>
+                  <span className="text-3xl font-bold text-slate-900">100%</span>
+                  <span className="text-sm text-slate-500 font-medium">Digital Records</span>
                 </div>
                 <div className="h-10 w-px bg-slate-200" />
                 <div className="flex flex-col">
-                  <span className="text-3xl font-bold text-slate-900">24/7</span>
-                  <span className="text-sm text-slate-500 font-medium">Emergency Care</span>
+                  <span className="text-3xl font-bold text-slate-900">Secure</span>
+                  <span className="text-sm text-slate-500 font-medium">Consultations</span>
                 </div>
               </div>
             </motion.div>

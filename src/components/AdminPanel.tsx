@@ -1,26 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
-import { db } from '../firebase';
-import { collection, query, onSnapshot, orderBy, updateDoc, doc, deleteDoc } from 'firebase/firestore';
-import { Appointment, User } from '../types';
+import { db, storage } from '../firebase';
+import { collection, query, onSnapshot, orderBy, updateDoc, doc, deleteDoc, addDoc } from 'firebase/firestore';
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { Appointment, User, Report } from '../types';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import { Users, Calendar, CheckCircle, XCircle, Trash2, Search } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
+import { Button } from '../../components/ui/button';
+import { Users, Calendar, CheckCircle, XCircle, Trash2, Search, FileText, Plus, User as UserIcon, ExternalLink, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const AdminPanel = () => {
   const { user, isAdmin } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'appointments' | 'patients'>('appointments');
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Report Modal State
+  const [selectedPatient, setSelectedPatient] = useState<User | null>(null);
+  const [viewingReportsPatient, setViewingReportsPatient] = useState<User | null>(null);
+  const [reportTitle, setReportTitle] = useState('');
+  const [reportUrl, setReportUrl] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isAddingReport, setIsAddingReport] = useState(false);
+  const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file');
 
   useEffect(() => {
     if (!isAdmin) return;
 
     const appointmentsQuery = query(collection(db, 'appointments'), orderBy('createdAt', 'desc'));
     const usersQuery = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+    const reportsQuery = query(collection(db, 'reports'), orderBy('uploadedAt', 'desc'));
 
     const unsubAppointments = onSnapshot(appointmentsQuery, (snapshot) => {
       setAppointments(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment)));
@@ -31,11 +48,27 @@ export const AdminPanel = () => {
       setLoading(false);
     });
 
+    const unsubReports = onSnapshot(reportsQuery, (snapshot) => {
+      setReports(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Report)));
+    });
+
     return () => {
       unsubAppointments();
       unsubUsers();
+      unsubReports();
     };
   }, [isAdmin]);
+
+  const filteredAppointments = appointments.filter(apt => 
+    apt.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    apt.doctorName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredPatients = users.filter(u => 
+    u.role === 'patient' && 
+    (u.displayName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+     u.email.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   const handleStatusUpdate = async (appointmentId: string, newStatus: string) => {
     try {
@@ -55,6 +88,91 @@ export const AdminPanel = () => {
     } catch (error) {
       console.error('Delete error:', error);
       toast.error('Failed to delete appointment');
+    }
+  };
+
+  const handleDeleteReport = async (reportId: string) => {
+    if (!confirm('Are you sure you want to delete this report?')) return;
+    try {
+      await deleteDoc(doc(db, 'reports', reportId));
+      toast.success('Report deleted');
+    } catch (error) {
+      console.error('Delete report error:', error);
+      toast.error('Failed to delete report');
+    }
+  };
+
+  const handleAddReport = async () => {
+    if (!selectedPatient || !reportTitle) {
+      toast.error('Please fill in the report title');
+      return;
+    }
+
+    if (uploadMode === 'file' && !selectedFile) {
+      toast.error('Please select a file to upload');
+      return;
+    }
+
+    if (uploadMode === 'url' && !reportUrl) {
+      toast.error('Please enter a valid report URL');
+      return;
+    }
+
+    try {
+      setIsAddingReport(true);
+
+      if (uploadMode === 'file' && selectedFile) {
+        setUploadProgress(0);
+        const storageRef = ref(storage, `reports/${selectedPatient.uid}/${Date.now()}_${selectedFile.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+        uploadTask.on('state_changed', 
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress(progress);
+          }, 
+          (error) => {
+            console.error('Upload error:', error);
+            toast.error(`Upload failed: ${error.message}. Try using the URL method instead.`);
+            setIsAddingReport(false);
+          }, 
+          async () => {
+            const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+            await saveReportToFirestore(downloadUrl, selectedFile.name, selectedFile.type);
+          }
+        );
+      } else {
+        // Manual URL Mode
+        await saveReportToFirestore(reportUrl, 'External Document', 'application/pdf');
+      }
+    } catch (error) {
+      console.error('General error:', error);
+      toast.error('An unexpected error occurred');
+      setIsAddingReport(false);
+    }
+  };
+
+  const saveReportToFirestore = async (url: string, fileName: string, fileType: string) => {
+    try {
+      await addDoc(collection(db, 'reports'), {
+        patientId: selectedPatient?.uid,
+        title: reportTitle,
+        fileUrl: url,
+        fileName: fileName,
+        fileType: fileType,
+        uploadedAt: new Date().toISOString(),
+      });
+
+      toast.success('Report record saved successfully');
+      setReportTitle('');
+      setReportUrl('');
+      setSelectedFile(null);
+      setUploadProgress(0);
+      setIsAddingReport(false);
+    } catch (dbError) {
+      console.error('Firestore save error:', dbError);
+      toast.error('Failed to save record to database');
+      setIsAddingReport(false);
     }
   };
 
@@ -116,92 +234,342 @@ export const AdminPanel = () => {
           </Card>
         </div>
 
-        {/* Appointments Management */}
-        <div className="lg:col-span-4">
-          <Card className="rounded-3xl border-slate-100 shadow-sm overflow-hidden">
-            <CardHeader className="border-b bg-slate-50/50 px-8 py-6 flex flex-row items-center justify-between">
-              <CardTitle className="text-xl font-bold">Manage Appointments</CardTitle>
-              <div className="relative w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <input 
-                  type="text" 
-                  placeholder="Search patients..." 
-                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="px-8">Patient</TableHead>
-                    <TableHead>Doctor</TableHead>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right px-8">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {appointments.map((apt) => (
-                    <TableRow key={apt.id} className="hover:bg-slate-50/50">
-                      <TableCell className="px-8 py-4">
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-slate-900">{apt.patientName}</span>
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <span>Age: {apt.patientAge}</span>
-                            <span>•</span>
-                            <span>{apt.patientPhone}</span>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-slate-600">{apt.doctorName}</span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="text-sm font-medium text-slate-900">{apt.date}</span>
-                          <span className="text-xs text-slate-500">{apt.time}</span>
-                          <Badge variant="outline" className={`mt-1 w-fit text-[10px] uppercase ${
-                            apt.type === 'online' ? 'border-blue-200 text-blue-600 bg-blue-50' : 'border-slate-200 text-slate-600 bg-slate-50'
-                          }`}>
-                            {apt.type}
-                          </Badge>
-                          {apt.paymentStatus === 'paid' && (
-                            <Badge variant="outline" className="mt-1 w-fit text-[10px] uppercase border-emerald-200 text-emerald-600 bg-emerald-50">
-                              Paid: ₹{apt.amount}
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Select value={apt.status} onValueChange={(val) => handleStatusUpdate(apt.id, val)}>
-                          <SelectTrigger className="w-[140px] h-9 rounded-full border-slate-200 text-xs font-semibold">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="confirmed">Confirmed</SelectItem>
-                            <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="text-right px-8">
-                        <button 
-                          onClick={() => handleDeleteAppointment(apt.id)}
-                          className="text-slate-400 hover:text-red-600 transition-colors"
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+        {/* Tab Navigation */}
+        <div className="lg:col-span-4 flex gap-4 mb-2">
+          <button 
+            onClick={() => setActiveTab('appointments')}
+            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
+              activeTab === 'appointments' 
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' 
+                : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50'
+            }`}
+          >
+            Appointments
+          </button>
+          <button 
+            onClick={() => setActiveTab('patients')}
+            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
+              activeTab === 'patients' 
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' 
+                : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50'
+            }`}
+          >
+            Patients & Reports
+          </button>
         </div>
+
+        {/* Appointments Management */}
+        {activeTab === 'appointments' ? (
+          <div className="lg:col-span-4">
+            <Card className="rounded-3xl border-slate-100 shadow-sm overflow-hidden">
+              <CardHeader className="border-b bg-slate-50/50 px-8 py-6 flex flex-row items-center justify-between">
+                <CardTitle className="text-xl font-bold">Manage Appointments</CardTitle>
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Search appointments..." 
+                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="px-8">Patient</TableHead>
+                      <TableHead>Doctor</TableHead>
+                      <TableHead>Date & Time</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right px-8">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAppointments.map((apt) => (
+                      <TableRow key={apt.id} className="hover:bg-slate-50/50">
+                        <TableCell className="px-8 py-4">
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-slate-900">{apt.patientName}</span>
+                            <div className="flex items-center gap-2 text-xs text-slate-500">
+                              <span>Age: {apt.patientAge}</span>
+                              <span>•</span>
+                              <span>{apt.patientPhone}</span>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-600">{apt.doctorName}</span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-slate-900">{apt.date}</span>
+                            <span className="text-xs text-slate-500">{apt.time}</span>
+                            <Badge variant="outline" className={`mt-1 w-fit text-[10px] uppercase ${
+                              apt.type === 'online' ? 'border-blue-200 text-blue-600 bg-blue-50' : 'border-slate-200 text-slate-600 bg-slate-50'
+                            }`}>
+                              {apt.type}
+                            </Badge>
+                            {apt.paymentStatus === 'paid' && (
+                              <Badge variant="outline" className="mt-1 w-fit text-[10px] uppercase border-emerald-200 text-emerald-600 bg-emerald-50">
+                                Paid: ₹{apt.amount}
+                              </Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Select value={apt.status} onValueChange={(val) => handleStatusUpdate(apt.id, val)}>
+                            <SelectTrigger className="w-[140px] h-9 rounded-full border-slate-200 text-xs font-semibold">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="confirmed">Confirmed</SelectItem>
+                              <SelectItem value="completed">Completed</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="text-right px-8">
+                          <button 
+                            onClick={() => handleDeleteAppointment(apt.id)}
+                            className="text-slate-400 hover:text-red-600 transition-colors"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <div className="lg:col-span-4">
+            <Card className="rounded-3xl border-slate-100 shadow-sm overflow-hidden">
+              <CardHeader className="border-b bg-slate-50/50 px-8 py-6 flex flex-row items-center justify-between">
+                <CardTitle className="text-xl font-bold">Patient Records & Reports</CardTitle>
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Search patients..." 
+                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="px-8">Patient Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Joined Date</TableHead>
+                      <TableHead className="text-right px-8">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredPatients.map((p) => (
+                      <TableRow key={p.uid} className="hover:bg-slate-50/50">
+                        <TableCell className="px-8 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                              <UserIcon className="h-5 w-5" />
+                            </div>
+                            <span className="font-semibold text-slate-900">{p.displayName}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-600">{p.email}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-slate-600">{new Date(p.createdAt).toLocaleDateString()}</span>
+                        </TableCell>
+                        <TableCell className="text-right px-8">
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="rounded-full text-slate-600 hover:text-emerald-600 hover:bg-emerald-50"
+                              onClick={() => setViewingReportsPatient(p)}
+                            >
+                              <FileText className="h-4 w-4 mr-2" /> View Reports
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="rounded-full border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+                              onClick={() => setSelectedPatient(p)}
+                            >
+                              <Plus className="h-4 w-4 mr-2" /> Add Report
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
+
+      {/* Add Report Dialog */}
+      <Dialog open={!!selectedPatient} onOpenChange={() => setSelectedPatient(null)}>
+        <DialogContent className="sm:max-w-[425px] rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Add Medical Report</DialogTitle>
+            <p className="text-slate-500 text-sm">Uploading for: <span className="font-bold text-emerald-600">{selectedPatient?.displayName}</span></p>
+          </DialogHeader>
+          <div className="grid gap-6 py-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-slate-700">Report Title</label>
+              <input 
+                type="text" 
+                placeholder="e.g. Blood Test Result"
+                className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                value={reportTitle}
+                onChange={(e) => setReportTitle(e.target.value)}
+              />
+            </div>
+
+            <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
+              <button 
+                onClick={() => setUploadMode('file')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${uploadMode === 'file' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                File Upload
+              </button>
+              <button 
+                onClick={() => setUploadMode('url')}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${uploadMode === 'url' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+              >
+                Manual URL
+              </button>
+            </div>
+
+            {uploadMode === 'file' ? (
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-slate-700">Select Report File (PDF/Image)</label>
+                <div className="relative">
+                  <input 
+                    type="file" 
+                    accept=".pdf,image/*"
+                    className="hidden"
+                    id="report-file-upload"
+                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  />
+                  <label 
+                    htmlFor="report-file-upload"
+                    className={`flex h-24 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all ${
+                      selectedFile ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-emerald-500 hover:bg-slate-50'
+                    }`}
+                  >
+                    <Plus className={`h-6 w-6 mb-2 ${selectedFile ? 'text-emerald-600' : 'text-slate-400'}`} />
+                    <span className="text-xs font-medium text-slate-600">
+                      {selectedFile ? selectedFile.name : 'Click to select file'}
+                    </span>
+                  </label>
+                </div>
+                {uploadProgress > 0 && (
+                  <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                    <div 
+                      className="bg-emerald-600 h-full transition-all duration-300" 
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-slate-700">Report URL (PDF/Image)</label>
+                <input 
+                  type="url" 
+                  placeholder="https://example.com/report.pdf"
+                  className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  value={reportUrl}
+                  onChange={(e) => setReportUrl(e.target.value)}
+                />
+                <p className="text-[10px] text-slate-400">Paste a link from Google Drive, Dropbox, or any file host.</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button 
+              onClick={handleAddReport} 
+              disabled={isAddingReport}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-6 text-lg font-semibold"
+            >
+              {isAddingReport ? 'Processing...' : 'Save Report Record'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Reports Dialog */}
+      <Dialog open={!!viewingReportsPatient} onOpenChange={() => setViewingReportsPatient(null)}>
+        <DialogContent className="sm:max-w-[600px] rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">Patient Medical Reports</DialogTitle>
+            <p className="text-slate-500 text-sm">Viewing records for: <span className="font-bold text-emerald-600">{viewingReportsPatient?.displayName}</span></p>
+          </DialogHeader>
+          <div className="py-4 max-h-[400px] overflow-y-auto">
+            {reports.filter(r => r.patientId === viewingReportsPatient?.uid).length === 0 ? (
+              <div className="py-12 text-center text-slate-500">
+                <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                <p>No reports found for this patient.</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {reports.filter(r => r.patientId === viewingReportsPatient?.uid).map((report) => (
+                  <div key={report.id} className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white transition-all group">
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                        <FileText className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-900 truncate">{report.title}</p>
+                        <p className="text-xs text-slate-500">{new Date(report.uploadedAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className="h-9 w-9 p-0 text-slate-400 hover:text-emerald-600"
+                        onClick={() => window.open(report.fileUrl, '_blank', 'noopener,noreferrer')}
+                      >
+                        <Eye className="h-5 w-5" />
+                      </Button>
+                      <button 
+                        onClick={() => handleDeleteReport(report.id)}
+                        className="p-2 text-slate-400 hover:text-red-600 transition-colors"
+                        title="Delete Report"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline"
+              onClick={() => setViewingReportsPatient(null)}
+              className="w-full rounded-xl py-6 text-lg font-semibold"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
