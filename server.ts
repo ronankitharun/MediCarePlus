@@ -43,7 +43,10 @@ async function startServer() {
       };
 
       const order = await razorpay.orders.create(options);
-      res.json(order);
+      res.json({ 
+        ...order, 
+        razorpay_key: process.env.RAZORPAY_KEY_ID 
+      });
     } catch (error) {
       console.error("Razorpay Order Error:", error);
       res.status(500).json({ error: "Failed to create order" });

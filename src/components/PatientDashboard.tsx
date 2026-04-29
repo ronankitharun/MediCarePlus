@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../AuthContext';
 import { db } from '../firebase';
 import { collection, query, where, onSnapshot, orderBy, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { Appointment, Report, Order } from '../types';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
-import { Button } from '../../components/ui/button';
-import { Calendar, Clock, FileText, User as UserIcon, Activity, ChevronRight, Eye, Phone, MapPin, XCircle, Video, Package } from 'lucide-react';
+import { Appointment, Report, Order, LabBooking } from '../types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Calendar, Clock, FileText, User as UserIcon, Activity, ChevronRight, Eye, Phone, MapPin, XCircle, Video, Package, FlaskConical } from 'lucide-react';
 import { toast } from 'sonner';
 import { motion } from 'motion/react';
 
@@ -17,6 +17,7 @@ export const PatientDashboard = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [labBookings, setLabBookings] = useState<LabBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
@@ -42,23 +43,34 @@ export const PatientDashboard = () => {
       orderBy('createdAt', 'desc')
     );
 
+    const labBookingsQuery = query(
+      collection(db, 'lab_bookings'),
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
+
     const unsubAppointments = onSnapshot(appointmentsQuery, (snapshot) => {
-      setAppointments(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Appointment)));
+      setAppointments(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Appointment)));
       setLoading(false);
     });
 
     const unsubReports = onSnapshot(reportsQuery, (snapshot) => {
-      setReports(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Report)));
+      setReports(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Report)));
     });
 
     const unsubOrders = onSnapshot(ordersQuery, (snapshot) => {
-      setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order)));
+      setOrders(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Order)));
+    });
+
+    const unsubLabBookings = onSnapshot(labBookingsQuery, (snapshot) => {
+      setLabBookings(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as LabBooking)));
     });
 
     return () => {
       unsubAppointments();
       unsubReports();
       unsubOrders();
+      unsubLabBookings();
     };
   }, [user]);
 
@@ -91,7 +103,7 @@ export const PatientDashboard = () => {
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Stats Section */}
-        <div className="lg:col-span-3 grid gap-6 md:grid-cols-4">
+        <div className="lg:col-span-3 grid gap-6 md:grid-cols-5">
           <Card className="rounded-3xl border-slate-100 shadow-sm">
             <CardContent className="flex items-center gap-4 p-6">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
@@ -100,6 +112,17 @@ export const PatientDashboard = () => {
               <div>
                 <p className="text-sm font-medium text-slate-500">Appointments</p>
                 <p className="text-2xl font-bold text-slate-900">{appointments.length}</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="rounded-3xl border-slate-100 shadow-sm">
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-600">
+                <FlaskConical className="h-6 w-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500">Lab Tests</p>
+                <p className="text-2xl font-bold text-slate-900">{labBookings.length}</p>
               </div>
             </CardContent>
           </Card>
@@ -138,8 +161,67 @@ export const PatientDashboard = () => {
           </Card>
         </div>
 
-        {/* Appointments Table */}
-        <div className="lg:col-span-2">
+        {/* Main Content Grid */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* Lab Bookings Section */}
+          <Card className="rounded-3xl border-slate-100 shadow-sm overflow-hidden">
+            <CardHeader className="border-b bg-slate-50/50 px-8 py-6">
+              <CardTitle className="text-xl font-bold">Diagnostic Bookings</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="px-8">Package</TableHead>
+                    <TableHead>Date & Time</TableHead>
+                    <TableHead>Collection</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {labBookings.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="h-32 text-center text-slate-500">No lab bookings found.</TableCell>
+                    </TableRow>
+                  ) : (
+                    labBookings.map((booking) => (
+                      <TableRow key={booking.id} className="group hover:bg-slate-50/50">
+                        <TableCell className="px-8 py-4">
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-900">{booking.packageName}</span>
+                            <span className="text-[10px] text-slate-400 font-mono uppercase">#{booking.id?.slice(-6) || 'N/A'}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-slate-900">{booking.date}</span>
+                            <span className="text-xs text-slate-500">{booking.time}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {booking.collectionType === 'home' ? <MapPin className="h-3 w-3 text-orange-500" /> : <FlaskConical className="h-3 w-3 text-emerald-500" />}
+                            <span className="text-xs capitalize font-medium">{booking.collectionType} Collection</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={`rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                            booking.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
+                            booking.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+                            'bg-slate-100 text-slate-700'
+                          }`}>
+                            {booking.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Appointments Table */}
           <Card className="rounded-3xl border-slate-100 shadow-sm overflow-hidden">
             <CardHeader className="border-b bg-slate-50/50 px-8 py-6">
               <CardTitle className="text-xl font-bold">Upcoming Appointments</CardTitle>
@@ -270,11 +352,17 @@ export const PatientDashboard = () => {
                      <div key={order.id} className="flex flex-col gap-2 rounded-2xl border border-slate-100 p-4 hover:bg-slate-50 transition-colors">
                         <div className="flex justify-between items-start">
                            <div>
-                              <p className="font-bold text-slate-900 text-sm">Order #{order.id.slice(-6).toUpperCase()}</p>
+                              <p className="font-bold text-slate-900 text-sm">Order #{order.id?.slice(-6)?.toUpperCase() || 'N/A'}</p>
                               <p className="text-[10px] text-slate-500">{new Date(order.createdAt).toLocaleDateString()}</p>
                            </div>
                            <Badge variant="outline" className="text-[10px] capitalize bg-white">{order.status}</Badge>
                         </div>
+                        {(order as any).prescriptionUploaded && (
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <FileText className="h-3 w-3 text-emerald-600" />
+                            <span className="text-[10px] text-emerald-600 font-medium italic">Prescription Attached</span>
+                          </div>
+                        )}
                         <div className="flex justify-between items-center mt-2">
                            <p className="text-xs text-slate-600">{order.items.length} Medicines</p>
                            <p className="font-bold text-emerald-600">₹{order.totalAmount.toFixed(2)}</p>

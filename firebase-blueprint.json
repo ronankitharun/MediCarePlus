@@ -67,6 +67,77 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["userId", "items", "totalAmount", "status", "address", "createdAt"]
+    },
+    "LabBooking": {
+      "title": "Lab Booking",
+      "description": "Diagnostic test booking details",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "patientName": { "type": "string" },
+        "patientAge": { "type": "number" },
+        "patientPhone": { "type": "string" },
+        "packageId": { "type": "string" },
+        "packageName": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "time": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled", "completed"] },
+        "collectionType": { "type": "string", "enum": ["home", "lab"] },
+        "address": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "packageId", "packageName", "date", "time", "status", "collectionType", "createdAt"]
+    },
+    "Doctor": {
+      "title": "Doctor",
+      "description": "Doctor profile information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "specialty": { "type": "string" },
+        "experience": { "type": "number" },
+        "education": { "type": "string" },
+        "hospital": { "type": "string" },
+        "bio": { "type": "string" },
+        "image": { "type": "string" },
+        "departmentId": { "type": "string" }
+      },
+      "required": ["name", "specialty"]
+    },
+    "Medicine": {
+      "title": "Medicine",
+      "description": "Pharmacy medicine details",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "brandName": { "type": "string" },
+        "genericName": { "type": "string" },
+        "price": { "type": "number" },
+        "stock": { "type": "number" },
+        "manufacturer": { "type": "string" },
+        "category": { "type": "string" },
+        "image": { "type": "string" },
+        "prescriptionRequired": { "type": "boolean" }
+      },
+      "required": ["name", "brandName", "price", "stock"]
+    },
+    "LabPackage": {
+      "title": "Lab Package",
+      "description": "Lab test package information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "parameters": { "type": "array" },
+        "category": { "type": "string" },
+        "sampleRequired": { "type": "string" },
+        "image": { "type": "string" },
+        "fastingRequired": { "type": "boolean" },
+        "isHomeCollectionAvailable": { "type": "boolean" }
+      },
+      "required": ["name", "description", "parameters"]
     }
   },
   "firestore": {
@@ -85,6 +156,22 @@
     "/pharmacy_orders/{orderId}": {
       "schema": "PharmacyOrder",
       "description": "Medicine order documents"
+    },
+    "/lab_bookings/{bookingId}": {
+      "schema": "LabBooking",
+      "description": "Lab test booking documents"
+    },
+    "/doctors/{doctorId}": {
+      "schema": "Doctor",
+      "description": "Doctor profile information"
+    },
+    "/medicines/{medicineId}": {
+      "schema": "Medicine",
+      "description": "Pharmacy medicine details"
+    },
+    "/lab_packages/{packageId}": {
+      "schema": "LabPackage",
+      "description": "Lab test package information"
     }
   }
 }

@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MEDICINES } from '../../constants';
+import { Medicine } from '../../types';
+import { db } from '../../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import { motion } from 'motion/react';
 import { 
   ArrowLeft, 
@@ -18,10 +21,10 @@ import {
   Share2,
   ArrowRight
 } from 'lucide-react';
-import { Button } from '../../../components/ui/button';
-import { Badge } from '../../../components/ui/badge';
-import { Card, CardContent } from '../../../components/ui/card';
-import { Separator } from '../../../components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { useMedicine } from '../../MedicineContext';
 import { toast } from 'sonner';
 
@@ -29,15 +32,47 @@ export const MedicineDetails: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, cart, updateQuantity } = useMedicine();
-  
-  const medicine = MEDICINES.find(m => m.id === id);
+  const [medicine, setMedicine] = useState<Medicine | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchMedicine = async () => {
+      const found = MEDICINES.find(m => m.id === id);
+      if (found) {
+        setMedicine(found);
+        setLoading(false);
+      } else {
+        try {
+          const docRef = doc(db, 'medicines', id!);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setMedicine({ id: docSnap.id, ...docSnap.data() } as Medicine);
+          }
+        } catch (err) {
+          console.error('Error fetching medicine:', err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchMedicine();
+  }, [id]);
+
   const cartItem = cart.find(item => item.medicine.id === id);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-20 text-center">
+        <p className="text-slate-500">Loading medicine details...</p>
+      </div>
+    );
+  }
 
   if (!medicine) {
     return (
       <div className="container mx-auto px-4 py-20 text-center">
         <h2 className="text-2xl font-bold">Medicine not found</h2>
-        <Button onClick={() => navigate('/pharmacy')} className="mt-4">Back to Pharmacy</Button>
+        <Button onClick={() => navigate('/pharmacy')} className="mt-4 border-emerald-600 text-emerald-600 hover:bg-emerald-50">Back to Pharmacy</Button>
       </div>
     );
   }

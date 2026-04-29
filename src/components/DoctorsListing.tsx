@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { DOCTORS, DEPARTMENTS } from '../constants';
-import { Button } from '../../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, MapPin, Star, Filter, ExternalLink } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import { auth, googleProvider, db } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { handleFirestoreError } from '../lib/firebaseUtils';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Doctor } from '../types';
 
 export const DoctorsListing = () => {
   const { user } = useAuth();
@@ -24,10 +26,30 @@ export const DoctorsListing = () => {
   const [patientName, setPatientName] = useState<string>('');
   const [appointmentType, setAppointmentType] = useState<'online' | 'offline'>('offline');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [allDoctors, setAllDoctors] = useState<Doctor[]>(DOCTORS);
+
+  useEffect(() => {
+    const q = query(collection(db, 'doctors'));
+    const unsub = onSnapshot(q, 
+      (snapshot) => {
+        const firestoreDoctors = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Doctor));
+        // Combine hardcoded with firestore (preventing duplicates if we gave them original IDs)
+        const combined = [...firestoreDoctors];
+        DOCTORS.forEach(d => {
+          if (!combined.find(cd => cd.id === d.id)) {
+            combined.push(d);
+          }
+        });
+        setAllDoctors(combined);
+      },
+      (error) => handleFirestoreError(error, 'list', 'doctors')
+    );
+    return () => unsub();
+  }, []);
 
   const filteredDoctors = selectedDept === 'all' 
-    ? DOCTORS 
-    : DOCTORS.filter(d => d.departmentId === selectedDept);
+    ? allDoctors 
+    : allDoctors.filter(d => d.departmentId === selectedDept);
 
   const handleBookClick = async (doctor: any) => {
     if (!user) {

@@ -1,23 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { MEDICINES } from '../../constants';
 import { Medicine } from '../../types';
 import { Search, Filter, ShoppingCart, Plus, Minus, ArrowRight, Share2, Info } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../components/ui/card';
-import { Button } from '../../../components/ui/button';
-import { Input } from '../../../components/ui/input';
-import { Badge } from '../../../components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { useMedicine } from '../../MedicineContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { collection, onSnapshot, query } from 'firebase/firestore';
+import { handleFirestoreError } from '../../lib/firebaseUtils';
+import { db } from '../../firebase';
 
 export const MedicineListing: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'prescription' | 'otc'>('all');
   const { cart, addToCart } = useMedicine();
   const navigate = useNavigate();
+  const [allMedicines, setAllMedicines] = useState<Medicine[]>(MEDICINES);
 
-  const filteredMedicines = MEDICINES.filter(med => {
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'medicines'), 
+      (snapshot) => {
+        const firestoreMedicines = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Medicine));
+        const combined = [...firestoreMedicines];
+        MEDICINES.forEach(m => {
+          if (!combined.find(cm => cm.id === m.id)) {
+            combined.push(m);
+          }
+        });
+        setAllMedicines(combined);
+      },
+      (error) => handleFirestoreError(error, 'list', 'medicines')
+    );
+    return () => unsub();
+  }, []);
+
+  const filteredMedicines = allMedicines.filter(med => {
     const matchesSearch = 
       med.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       med.genericName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -44,7 +65,7 @@ export const MedicineListing: React.FC = () => {
           </p>
         </div>
 
-        <div className="w-full max-w-3xl flex flex-col md:flex-row gap-4">
+        <div className="w-full max-w-3xl flex flex-col md:flex-row gap-4 relative">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <Input 
@@ -54,6 +75,32 @@ export const MedicineListing: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
+            {searchQuery && searchQuery.length >= 2 && filteredMedicines.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden max-h-60 overflow-y-auto">
+                {filteredMedicines.slice(0, 5).map(med => (
+                  <div 
+                    key={med.id}
+                    className="p-4 hover:bg-emerald-50 cursor-pointer flex items-center justify-between group border-b border-slate-50 last:border-none"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSearchQuery(med.name);
+                      navigate(`/pharmacy/${med.id}`);
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg overflow-hidden shrink-0">
+                        <img src={med.image} alt="" className="h-full w-full object-cover" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900 group-hover:text-emerald-700 transition-colors uppercase text-xs">{med.name}</p>
+                        <p className="text-[10px] text-slate-500">{med.genericName}</p>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-emerald-500 transition-transform group-hover:translate-x-1" />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="flex gap-2">
             {(['all', 'prescription', 'otc'] as const).map(cat => (
@@ -119,7 +166,7 @@ export const MedicineListing: React.FC = () => {
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
                 <div className="flex flex-wrap gap-1">
-                  {medicine.symptoms.slice(0, 3).map(s => (
+                  {medicine.symptoms?.slice(0, 3).map(s => (
                     <Badge key={s} variant="secondary" className="bg-slate-50 text-slate-500 hover:bg-slate-100 border-none text-[10px]">
                       {s}
                     </Badge>

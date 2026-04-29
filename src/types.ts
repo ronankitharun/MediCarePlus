@@ -114,6 +114,44 @@ export interface Order {
     pincode: string;
   };
   deliverySlot: string;
+  prescriptionUploaded?: boolean;
+  paymentStatus: 'pending' | 'paid' | 'failed';
+  paymentId?: string;
+  razorpayOrderId?: string;
+  createdAt: string;
+}
+
+export interface LabPackage {
+  id: string;
+  name: string;
+  description: string;
+  parameters: string[]; // Number of tests included
+  category: 'general' | 'cardiac' | 'diabetes' | 'women' | 'men' | 'renal';
+  image: string;
+  sampleRequired: string;
+  fastingRequired: boolean;
+  preparation?: string;
+  isHomeCollectionAvailable: boolean;
+}
+
+export interface LabBooking {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  packageId: string;
+  packageName: string;
+  amount: number;
+  date: string;
+  time: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  collectionType: 'home' | 'lab';
+  address?: {
+    fullName: string;
+    phone: string;
+    street: string;
+    pincode: string;
+  };
   paymentStatus: 'pending' | 'paid' | 'failed';
   paymentId?: string;
   razorpayOrderId?: string;

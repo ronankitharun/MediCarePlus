@@ -11,15 +11,16 @@ import {
   CircleCheck, 
   ShieldCheck, 
   Truck,
-  Building
+  Building,
+  FileText
 } from 'lucide-react';
-import { Button } from '../../../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
-import { Input } from '../../../components/ui/input';
-import { Label } from '../../../components/ui/label';
-import { Separator } from '../../../components/ui/separator';
-import { Badge } from '../../../components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { toast } from 'sonner';
@@ -40,6 +41,26 @@ export const MedicineCheckout: React.FC = () => {
   });
   
   const [deliverySlot, setDeliverySlot] = useState('Standard (24-48 Hours)');
+  const [prescriptionFile, setPrescriptionFile] = useState<File | null>(null);
+  const [prescriptionPreview, setPrescriptionPreview] = useState<string | null>(null);
+
+  const needsPrescription = cart.some(item => item.medicine.prescriptionRequired);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size should be less than 5MB");
+        return;
+      }
+      setPrescriptionFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPrescriptionPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handlePlaceOrder = async () => {
     if (!address.fullName || !address.phone || !address.street || !address.pincode) {
@@ -50,6 +71,11 @@ export const MedicineCheckout: React.FC = () => {
     if (!/^\d{10}$/.test(address.phone)) {
        toast.error("Please enter a valid 10-digit phone number");
        return;
+    }
+
+    if (needsPrescription && !prescriptionFile) {
+      toast.error("Please upload a prescription for restricted medicines");
+      return;
     }
 
     try {
@@ -64,16 +90,15 @@ export const MedicineCheckout: React.FC = () => {
       
       if (!orderRes.ok) throw new Error('Failed to create payment order');
       const orderData = await orderRes.json();
+      const razorpayKey = orderData.razorpay_key;
 
-      // 2. Open Razorpay Checkout
-      const razorpayKey = (import.meta as any).env.VITE_RAZORPAY_KEY_ID;
-      
       if (!razorpayKey) {
         setIsProcessing(false);
-        toast.error("Razorpay Key ID is not configured in environment variables.");
+        toast.error("Razorpay Key ID is not configured in the server environment.");
         return;
       }
 
+      // 2. Open Razorpay Checkout
       const options = {
         key: razorpayKey,
         amount: orderData.amount,
@@ -130,6 +155,7 @@ export const MedicineCheckout: React.FC = () => {
         status: 'pending',
         address,
         deliverySlot,
+        prescriptionUploaded: !!prescriptionFile,
         paymentStatus: 'paid',
         paymentId,
         razorpayOrderId,
@@ -243,6 +269,54 @@ export const MedicineCheckout: React.FC = () => {
                   </Select>
                </CardContent>
             </Card>
+
+            {needsPrescription && (
+              <Card className="rounded-[2.5rem] border-dashed border-2 border-emerald-200 bg-emerald-50/20 overflow-hidden">
+                <CardHeader className="p-8 pb-4">
+                  <CardTitle className="text-xl font-bold flex items-center gap-2 text-emerald-900">
+                    <FileText className="h-5 w-5 text-emerald-600" />
+                    Prescription Upload Required
+                  </CardTitle>
+                  <p className="text-sm text-emerald-700">One or more items in your cart require a valid prescription.</p>
+                </CardHeader>
+                <CardContent className="p-8 pt-0 space-y-4">
+                  <div 
+                    className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors ${prescriptionFile ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-emerald-400 bg-white'}`}
+                    onClick={() => document.getElementById('prescription-input')?.click()}
+                  >
+                    <input 
+                      type="file" 
+                      id="prescription-input" 
+                      className="hidden" 
+                      accept="image/*,.pdf" 
+                      onChange={handleFileChange}
+                    />
+                    {prescriptionPreview ? (
+                      <div className="flex items-center justify-between gap-4 text-left">
+                        <div className="flex items-center gap-3">
+                          <div className="p-3 bg-emerald-100 rounded-xl">
+                            <CircleCheck className="h-6 w-6 text-emerald-600" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-900 leading-none">Prescription Uploaded</p>
+                            <p className="text-xs text-slate-500 mt-1">{prescriptionFile?.name}</p>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setPrescriptionFile(null); setPrescriptionPreview(null); }} className="text-red-500 hover:text-red-600 hover:bg-red-50">Remove</Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <div className="p-4 bg-emerald-100 rounded-2xl mb-4">
+                          <FileText className="h-8 w-8 text-emerald-600" />
+                        </div>
+                        <p className="font-bold text-slate-900">Click to upload prescription</p>
+                        <p className="text-xs text-slate-500 mt-1">Supports Image or PDF (Max 5MB)</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           <div className="space-y-8">

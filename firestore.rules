@@ -2,92 +2,227 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // ===============================================================
-    // Assumed Data Model
-    // ===============================================================
-    //
-    // Collection: users
-    // Document ID: userId
-    // Fields:
-    //   - uid: string (required)
-    //   - email: string (required)
-    //   - displayName: string
-    //   - role: string (patient, doctor, admin) (required)
-    //   - createdAt: timestamp (required)
-    //
-    // Collection: appointments
-    // Document ID: appointmentId
-    // Fields:
-    //   - patientId: string (required)
-    //   - doctorId: string (required)
-    //   - date: string (required)
-    //   - time: string (required)
-    //   - status: string (pending, confirmed, cancelled, completed) (required)
-    //
-    // Collection: reports
-    // Document ID: reportId
-    // Fields:
-    //   - patientId: string (required)
-    //   - title: string (required)
-    //   - fileUrl: string (required)
-    //
-    // ===============================================================
+    // Default Deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
 
     // ===============================================================
     // Helper Functions
     // ===============================================================
     
-    function isAuthenticated() {
+    function isSignedIn() {
       return request.auth != null;
     }
     
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
     }
-    
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Role-based Access Control Helpers
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function userExists() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
     function isAdmin() {
-      return isAuthenticated() && 
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-         (request.auth.token.email == "2000030868cse@gmail.com" && request.auth.token.email_verified == true));
-    }
-    
-    function isPatient() {
-      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'patient';
+      return isSignedIn() && (
+        (request.auth.token.email == "2000030868cse@gmail.com" && isEmailVerified()) ||
+        (userExists() && getUserData().role == 'admin')
+      );
     }
 
     function isDoctor() {
-      return isAuthenticated() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'doctor';
+      return isSignedIn() && userExists() && getUserData().role == 'doctor';
+    }
+
+    function isPatient() {
+      return isSignedIn() && userExists() && getUserData().role == 'patient';
     }
 
     // ===============================================================
-    // Rules
+    // Collection Rules
     // ===============================================================
 
+    // Users Collection
     match /users/{userId} {
-      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      allow create: if isAuthenticated() && isOwner(userId) && 
-        (request.resource.data.role == 'patient' || (request.resource.data.role == 'admin' && isAdmin()));
-      allow update: if isAuthenticated() && (isAdmin() || (isOwner(userId) && request.resource.data.role == resource.data.role));
+      function isValidUser(data) {
+        return data.keys().hasAll(['uid', 'email', 'role', 'createdAt']) &&
+               data.uid == request.auth.uid &&
+               data.email is string &&
+               data.role in ['patient', 'doctor', 'admin'] &&
+               data.createdAt is string; // or timestamp if changed
+      }
+
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      
+      allow create: if isSignedIn() && request.auth.uid == userId && isValidUser(incoming()) && (
+        incoming().role == 'patient' || 
+        (incoming().role == 'admin' && request.auth.token.email == "2000030868cse@gmail.com")
+      );
+
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        (request.auth.uid == userId && 
+         incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'phoneNumber']) &&
+         incoming().role == existing().role)
+      );
     }
 
+    // Appointments Collection
     match /appointments/{appointmentId} {
-      allow read: if isAuthenticated() && (request.auth.uid == resource.data.patientId || request.auth.uid == resource.data.doctorId || isAdmin());
-      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.patientId || isAdmin());
-      allow update: if isAuthenticated() && (request.auth.uid == resource.data.patientId || request.auth.uid == resource.data.doctorId || isAdmin());
+      function isValidAppointment(data) {
+        return data.keys().hasAll(['patientId', 'doctorId', 'date', 'time', 'status', 'createdAt']) &&
+               data.patientId is string &&
+               data.doctorId is string &&
+               data.status in ['pending', 'confirmed', 'cancelled', 'completed'] &&
+               data.createdAt is string;
+      }
+
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.patientId || 
+        request.auth.uid == resource.data.doctorId || 
+        isAdmin()
+      );
+
+      allow create: if isSignedIn() && 
+                    request.auth.uid == incoming().patientId && 
+                    isValidAppointment(incoming());
+
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        (request.auth.uid == existing().patientId && incoming().diff(existing()).affectedKeys().hasOnly(['status']) && incoming().status == 'cancelled') ||
+        (request.auth.uid == existing().doctorId && incoming().diff(existing()).affectedKeys().hasOnly(['status']))
+      );
+
       allow delete: if isAdmin();
     }
 
+    // Reports Collection
     match /reports/{reportId} {
-      allow read: if isAuthenticated() && (request.auth.uid == resource.data.patientId || isAdmin());
-      allow create: if isAdmin();
+      function isValidReport(data) {
+        return data.keys().hasAll(['patientId', 'title', 'fileUrl', 'uploadedAt']) &&
+               data.patientId is string &&
+               data.title is string &&
+               data.fileUrl is string &&
+               data.uploadedAt is string;
+      }
+
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.patientId || 
+        isAdmin()
+      );
+
+      allow create: if isAdmin() && isValidReport(incoming());
+      allow update: if isAdmin() && isValidReport(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Pharmacy Orders Collection
+    match /pharmacy_orders/{orderId} {
+      function isValidOrder(data) {
+        return data.keys().hasAll(['userId', 'items', 'totalAmount', 'status', 'address', 'createdAt']) &&
+               data.userId is string &&
+               data.items is list &&
+               data.items.size() > 0 &&
+               data.totalAmount is number &&
+               data.status in ['pending', 'processing', 'shipped', 'delivered', 'cancelled'] &&
+               data.createdAt is string;
+      }
+
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.userId || 
+        isAdmin()
+      );
+
+      allow create: if isSignedIn() && 
+                    (request.auth.uid == incoming().userId || incoming().userId == 'anonymous') && 
+                    isValidOrder(incoming());
+
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
-    match /pharmacy_orders/{orderId} {
-      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId || isAdmin());
-      allow create: if isAuthenticated() && (request.auth.uid == request.resource.data.userId || request.resource.data.userId == 'anonymous');
+    // Lab Bookings Collection
+    match /lab_bookings/{bookingId} {
+      function isValidBooking(data) {
+        return data.keys().hasAll(['userId', 'packageId', 'packageName', 'date', 'time', 'status', 'collectionType', 'createdAt']) &&
+               data.userId is string &&
+               data.packageId is string &&
+               data.status in ['pending', 'confirmed', 'cancelled', 'completed'] &&
+               data.collectionType in ['home', 'lab'] &&
+               data.createdAt is string;
+      }
+
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.userId || 
+        isAdmin()
+      );
+
+      allow create: if isSignedIn() && 
+                    request.auth.uid == incoming().userId && 
+                    isValidBooking(incoming());
+
       allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Doctors Collection
+    match /doctors/{doctorId} {
+      function isValidDoctor(data) {
+        return data.keys().hasAll(['name', 'specialty']) &&
+               data.name is string && data.name.size() > 0 &&
+               data.specialty is string && data.specialty.size() > 0;
+      }
+
+      allow read: if true;
+      allow create: if isAdmin() && isValidDoctor(incoming());
+      allow update: if isAdmin() && isValidDoctor(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Medicines Collection
+    match /medicines/{medicineId} {
+      function isValidMedicine(data) {
+        return data.keys().hasAll(['name', 'brandName', 'price', 'stock']) &&
+               data.name is string && data.name.size() > 0 &&
+               data.price is number && data.price >= 0 &&
+               data.stock is number && data.stock >= 0;
+      }
+
+      allow read: if true;
+      allow create: if isAdmin() && isValidMedicine(incoming());
+      allow update: if isAdmin() && isValidMedicine(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // Lab Packages Collection
+    match /lab_packages/{packageId} {
+      function isValidLabPackage(data) {
+        return data.keys().hasAll(['name', 'description', 'parameters']) &&
+               data.name is string && data.name.size() > 0 &&
+               data.description is string && data.description.size() > 0 &&
+               data.parameters is list;
+      }
+
+      allow read: if true;
+      allow create: if isAdmin() && isValidLabPackage(incoming());
+      allow update: if isAdmin() && isValidLabPackage(incoming());
       allow delete: if isAdmin();
     }
   }

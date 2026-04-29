@@ -1,4 +1,4 @@
-import { Department, Doctor, Medicine } from './types';
+import { Department, Doctor, Medicine, LabPackage } from './types';
 
 export const DEPARTMENTS: Department[] = [
   {
@@ -165,5 +165,64 @@ export const MEDICINES: Medicine[] = [
     prescriptionRequired: false,
     stock: 350,
     symptoms: ['Cold', 'Cough', 'Body Ache'],
+  }
+];
+
+export const LAB_PACKAGES: LabPackage[] = [
+  {
+    id: 'lab-1',
+    name: 'Diabetic Health Checkup',
+    description: 'Get the comprehensive Diabetic Health Checkup plan and maintain your overall health with early detection of complications.',
+    parameters: ['HbA1c', 'FBS', 'Lipid Profile', 'Urine Microalbumin'],
+    category: 'diabetes',
+    image: 'https://images.unsplash.com/photo-1579152276557-8cee2e6c6c2b?auto=format&fit=crop&q=80&w=800',
+    sampleRequired: 'Blood, Urine',
+    fastingRequired: true,
+    preparation: '10-12 hours fasting required',
+    isHomeCollectionAvailable: true
+  },
+  {
+    id: 'lab-2',
+    name: 'General Health Checkup',
+    description: 'A step towards lifelong health with full body checkup to detect and prevent the potential issues in advance.',
+    parameters: ['CBC', 'Liver Profile', 'Kidney Profile', 'Glucose'],
+    category: 'general',
+    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800',
+    sampleRequired: 'Blood',
+    fastingRequired: true,
+    isHomeCollectionAvailable: true
+  },
+  {
+    id: 'lab-3',
+    name: 'Cardiac Profile',
+    description: 'Ensuring a healthy heart with thorough evaluation and screening with our complete Cardiac Profile for risk elimination.',
+    parameters: ['ECG', 'ECHO', 'Lipid Profile', 'TMT'],
+    category: 'cardiac',
+    image: 'https://images.unsplash.com/photo-1628348017897-42a174351329?auto=format&fit=crop&q=80&w=800',
+    sampleRequired: 'Blood, Imaging',
+    fastingRequired: false,
+    isHomeCollectionAvailable: false
+  },
+  {
+    id: 'lab-4',
+    name: 'Executive Health Checkup (Female)',
+    description: 'Promoting healthy life and wellness to all the women with our extensive health checkup plan curated especially for females.',
+    parameters: ['Pap Smear', 'Mammography', 'Thyroid Profile', 'Vitamin D'],
+    category: 'women',
+    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800',
+    sampleRequired: 'Blood, Swab',
+    fastingRequired: true,
+    isHomeCollectionAvailable: true
+  },
+  {
+    id: 'lab-5',
+    name: 'Renal (Kidney) Health Checkup',
+    description: 'Detect the signs of risk and get the preventive tips for maintaining the health of your kidneys.',
+    parameters: ['Creatinine', 'BUN', 'Uric Acid', 'Electrolytes'],
+    category: 'renal',
+    image: 'https://images.unsplash.com/photo-1559133965-f81d92ee655c?auto=format&fit=crop&q=80&w=800',
+    sampleRequired: 'Blood, Urine',
+    fastingRequired: true,
+    isHomeCollectionAvailable: true
   }
 ];

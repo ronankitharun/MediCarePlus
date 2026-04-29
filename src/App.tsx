@@ -14,6 +14,7 @@ import { DepartmentsListing } from './components/DepartmentsListing';
 import { PatientDashboard } from './components/PatientDashboard';
 import { AdminPanel } from './components/AdminPanel';
 import { Pharmacy } from './components/Pharmacy/Pharmacy';
+import { Lab } from './components/Lab/Lab';
 import { PrivacyPolicy, TermsOfService } from './components/LegalPages';
 import { Link } from 'react-router-dom';
 
@@ -30,6 +31,7 @@ export default function App() {
                 <Route path="/departments" element={<DepartmentsListing />} />
                 <Route path="/doctors" element={<DoctorsListing />} />
                 <Route path="/pharmacy/*" element={<Pharmacy />} />
+                <Route path="/lab/*" element={<Lab />} />
                 <Route path="/dashboard" element={<PatientDashboard />} />
                 <Route path="/admin" element={<AdminPanel />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />

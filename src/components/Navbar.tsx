@@ -44,6 +44,7 @@ export const Navbar = () => {
     { to: '/departments', label: 'Departments' },
     { to: '/doctors', label: 'Doctors' },
     { to: '/pharmacy', label: 'Pharmacy' },
+    { to: '/lab', label: 'Lab & Diagnostic' },
     ...(user ? [{ to: '/dashboard', label: 'My Appointments' }] : []),
     ...(user?.role === 'admin' ? [{ to: '/admin', label: 'Admin Panel' }] : []),
   ];
