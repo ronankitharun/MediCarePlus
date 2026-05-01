@@ -45,9 +45,9 @@ export const DOCTORS: Doctor[] = [
     specialty: 'Orthopedic Surgeon',
     departmentId: 'orthopedics',
     experience: 3,
-    education: 'MD - Neurology, AIIMS',
+    education: 'MS - Orthopaedics, AIIMS',
     bio: 'Expert in sports medicine and joint replacement surgeries.',
-    image: '/dr-sai.jpg',
+    image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=800',
     hospital: 'A One Hospital, Srikakulam, 532001',
     googleMapsUrl: 'https://maps.app.goo.gl/BopSTSxKmbu1QpZs9',
     availability: {
