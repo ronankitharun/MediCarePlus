@@ -24,8 +24,7 @@ export const AdminPanel = () => {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [labPackages, setLabPackages] = useState<LabPackage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'appointments' | 'patients' | 'lab' | 'management'>('appointments');
-  const [mgmtTab, setMgmtTab] = useState<'doctors' | 'medicines' | 'labs'>('doctors');
+  const [activeTab, setActiveTab] = useState<'appointments' | 'patients'>('appointments');
   const [searchTerm, setSearchTerm] = useState('');
   
   // Entity Form States
@@ -300,7 +299,7 @@ export const AdminPanel = () => {
 
       <div className="grid gap-8 lg:grid-cols-4">
         {/* Stats */}
-        <div className="lg:col-span-4 grid gap-6 md:grid-cols-5">
+        <div className="lg:col-span-4 grid gap-6 md:grid-cols-2">
           <Card className="rounded-3xl border-slate-100 shadow-sm">
             <CardContent className="flex items-center gap-4 p-6">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
@@ -314,45 +313,12 @@ export const AdminPanel = () => {
           </Card>
           <Card className="rounded-3xl border-slate-100 shadow-sm">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-600">
-                <FlaskConical className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Lab Bookings</p>
-                <p className="text-2xl font-bold text-slate-900">{labBookings.length}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="rounded-3xl border-slate-100 shadow-sm">
-            <CardContent className="flex items-center gap-4 p-6">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
                 <Calendar className="h-6 w-6" />
               </div>
               <div>
                 <p className="text-sm font-medium text-slate-500">Total Appointments</p>
                 <p className="text-2xl font-bold text-slate-900">{appointments.length}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="rounded-3xl border-slate-100 shadow-sm">
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
-                <CheckCircle className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Confirmed</p>
-                <p className="text-2xl font-bold text-slate-900">{appointments.filter(a => a.status === 'confirmed').length}</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="rounded-3xl border-slate-100 shadow-sm">
-            <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-                <XCircle className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Cancelled</p>
-                <p className="text-2xl font-bold text-slate-900">{appointments.filter(a => a.status === 'cancelled').length}</p>
               </div>
             </CardContent>
           </Card>
@@ -379,26 +345,6 @@ export const AdminPanel = () => {
             }`}
           >
             Patients & Reports
-          </button>
-          <button 
-            onClick={() => setActiveTab('lab')}
-            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
-              activeTab === 'lab' 
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' 
-                : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50'
-            }`}
-          >
-            Lab Bookings
-          </button>
-          <button 
-            onClick={() => setActiveTab('management')}
-            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
-              activeTab === 'management' 
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' 
-                : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50'
-            }`}
-          >
-            Management
           </button>
         </div>
 
