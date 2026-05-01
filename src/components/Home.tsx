@@ -23,17 +23,14 @@ export const Home = () => {
                 Now Open for Digital Consultations
               </div>
               <h1 className="text-5xl font-extrabold tracking-tight text-slate-900 md:text-6xl lg:text-7xl">
-                Healthcare, <span className="text-emerald-600">Simplified</span> for You
+                Expert care by <span className="text-emerald-600">Dr. Sai Theja</span>
               </h1>
               <p className="text-lg text-slate-600 max-w-lg leading-relaxed">
-                Connect with dedicated medical specialists through a seamless digital experience. ArogyaLink brings quality care to your fingertips with transparent pricing and secure records.
+                Dedicated Orthopedic Surgeon specializing in sports medicine and joint replacement. Get world-class orthopedic care with personalized treatment plans.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Button asChild size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 text-lg rounded-xl shadow-xl shadow-emerald-200">
                   <Link to="/doctors">Book Appointment</Link>
-                </Button>
-                <Button asChild variant="outline" size="lg" className="px-8 py-6 text-lg rounded-xl border-2 border-emerald-600 text-emerald-600 hover:bg-emerald-50">
-                  <Link to="/departments">Explore Services</Link>
                 </Button>
               </div>
               <div className="flex items-center gap-8 pt-4">
@@ -99,35 +96,6 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* Departments Section */}
-      <section className="container mx-auto px-4">
-        <div className="mb-12 flex items-end justify-between">
-          <div className="flex flex-col gap-4">
-            <h2 className="text-4xl font-bold text-slate-900 tracking-tight">Our Specialized <span className="text-emerald-600">Departments</span></h2>
-            <p className="text-slate-600 max-w-xl">We provide comprehensive medical services across multiple departments, ensuring you receive the best care possible.</p>
-          </div>
-          <Button asChild variant="ghost" className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
-            <Link to="/departments" className="flex items-center gap-2">View All <ArrowRight className="h-4 w-4" /></Link>
-          </Button>
-        </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {DEPARTMENTS.slice(0, 3).map((dept) => (
-            <Link key={dept.id} to={`/departments?id=${dept.id}`} className="group relative overflow-hidden rounded-3xl aspect-[4/3]">
-              <img 
-                src={dept.image} 
-                alt={dept.name} 
-                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 p-8 text-white">
-                <h3 className="text-2xl font-bold mb-2">{dept.name}</h3>
-                <p className="text-sm text-slate-200 line-clamp-2">{dept.description}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
     </div>
   );
 };

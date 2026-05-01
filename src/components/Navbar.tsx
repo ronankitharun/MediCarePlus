@@ -41,10 +41,7 @@ export const Navbar = () => {
   };
 
   const navLinks = [
-    { to: '/departments', label: 'Departments' },
-    { to: '/doctors', label: 'Doctors' },
-    { to: '/pharmacy', label: 'Pharmacy' },
-    { to: '/lab', label: 'Lab & Diagnostic' },
+    { to: '/doctors', label: 'Doctor Profile' },
     ...(user ? [{ to: '/dashboard', label: 'My Appointments' }] : []),
     ...(user?.role === 'admin' ? [{ to: '/admin', label: 'Admin Panel' }] : []),
   ];
