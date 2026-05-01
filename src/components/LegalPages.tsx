@@ -35,7 +35,7 @@ export const PrivacyPolicy = () => (
         1. Introduction
       </h2>
       <p className="text-slate-600 leading-relaxed">
-        At ArogyaLink, we value your privacy and are committed to protecting your personal and medical data. 
+        At Dr. Sai Theja Orthopedic Care, we value your privacy and are committed to protecting your personal and medical data. 
         This Privacy Policy explains how we collect, use, and safeguard your information when you use our 
         telemedicine platform.
       </p>
@@ -88,7 +88,7 @@ export const TermsOfService = () => (
         1. Nature of Service
       </h2>
       <p className="text-slate-600 leading-relaxed">
-        ArogyaLink is a telemedicine platform. While our doctors strive to provide the best care, 
+        Dr. Sai Theja Orthopedic Care is a medical platform. While we strive to provide the best care, 
         online consultations are not a replacement for emergency medical services. In case of a 
         life-threatening emergency, please visit the nearest hospital immediately.
       </p>
@@ -124,7 +124,7 @@ export const TermsOfService = () => (
         4. Limitation of Liability
       </h2>
       <p className="text-slate-600 leading-relaxed">
-        ArogyaLink and its staff are not liable for any indirect, incidental, or consequential damages 
+        Dr. Sai Theja Orthopedic Care and its staff are not liable for any indirect, incidental, or consequential damages 
         arising from the use of the platform, including but not limited to medical complications 
         resulting from inaccurate information provided by the user.
       </p>

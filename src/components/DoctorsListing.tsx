@@ -26,26 +26,26 @@ export const DoctorsListing = () => {
   const [patientName, setPatientName] = useState<string>('');
   const [appointmentType, setAppointmentType] = useState<'online' | 'offline'>('offline');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [allDoctors, setAllDoctors] = useState<Doctor[]>(DOCTORS);
+  const [allDoctors] = useState<Doctor[]>(DOCTORS);
 
-  useEffect(() => {
-    const q = query(collection(db, 'doctors'));
-    const unsub = onSnapshot(q, 
-      (snapshot) => {
-        const firestoreDoctors = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Doctor));
-        // Combine hardcoded with firestore (preventing duplicates if we gave them original IDs)
-        const combined = [...firestoreDoctors];
-        DOCTORS.forEach(d => {
-          if (!combined.find(cd => cd.id === d.id)) {
-            combined.push(d);
-          }
-        });
-        setAllDoctors(combined);
-      },
-      (error) => handleFirestoreError(error, 'list', 'doctors')
-    );
-    return () => unsub();
-  }, []);
+  /* Removing Firestore fetch to ensure only Dr. Sai Theja is shown and his hardcoded image is used */
+  // useEffect(() => {
+  //   const q = query(collection(db, 'doctors'));
+  //   const unsub = onSnapshot(q, 
+  //     (snapshot) => {
+  //       const firestoreDoctors = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Doctor));
+  //       const combined = [...firestoreDoctors];
+  //       DOCTORS.forEach(d => {
+  //         if (!combined.find(cd => cd.id === d.id)) {
+  //           combined.push(d);
+  //         }
+  //       });
+  //       setAllDoctors(combined);
+  //     },
+  //     (error) => handleFirestoreError(error, 'list', 'doctors')
+  //   );
+  //   return () => unsub();
+  // }, []);
 
   const filteredDoctors = selectedDept === 'all' 
     ? allDoctors 
@@ -109,7 +109,7 @@ export const DoctorsListing = () => {
           key: (import.meta as any).env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
           amount: orderData.amount,
           currency: orderData.currency,
-          name: 'ArogyaLink',
+          name: 'Dr. Sai Theja Orthopedic Care',
           description: `Consultation with ${bookingDoctor.name}`,
           order_id: orderData.id,
           handler: async (response: any) => {

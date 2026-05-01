@@ -63,7 +63,7 @@ export const Navbar = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-lg shadow-emerald-200">
               <Heart className="h-6 w-6" fill="currentColor" />
             </div>
-            <span className="text-xl font-bold tracking-tight text-slate-900">Arogya<span className="text-emerald-600">Link</span></span>
+            <span className="text-xl font-bold tracking-tight text-slate-900">Dr. Sai <span className="text-emerald-600">Theja</span></span>
           </Link>
         </div>
 

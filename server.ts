@@ -118,7 +118,7 @@ async function startServer() {
       });
 
       const mailOptions = {
-        from: `"ArogyaLink Notification" <${process.env.EMAIL_USER}>`,
+        from: `"Dr. Sai Theja Notification" <${process.env.EMAIL_USER}>`,
         to: process.env.ADMIN_EMAIL,
         subject: "New Appointment Booked! 🏥",
         html: `
