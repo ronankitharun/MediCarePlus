@@ -33,6 +33,16 @@ export const sendAdminNotification = async (params: EmailParams) => {
         appointment_date: params.date,
         appointment_time: params.time,
         appointment_type: params.type,
+        // This matches the {{message}} placeholder in your screenshot
+        message: `New appointment for ${params.patientName}. 
+Phone: ${params.patientPhone}
+Date: ${params.date}
+Time: ${params.time}
+Type: ${params.type}`,
+        // This matches the {{name}} placeholder in your screenshot
+        name: params.patientName,
+        // This matches the {{time}} placeholder in your screenshot
+        time: params.time,
       },
       publicKey
     );
