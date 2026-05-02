@@ -36,7 +36,7 @@ export const Home = () => {
               <div className="flex items-center gap-8 pt-4">
                 <div className="flex flex-col">
                   <span className="text-3xl font-bold text-slate-900">Verified</span>
-                  <span className="text-sm text-slate-500 font-medium">Specialists</span>
+                  <span className="text-sm text-slate-500 font-medium">Surgeon</span>
                 </div>
                 <div className="h-10 w-px bg-slate-200" />
                 <div className="flex flex-col">
@@ -81,10 +81,10 @@ export const Home = () => {
           </div>
           <div className="group rounded-3xl border border-slate-100 bg-white p-8 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
             <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-              <Stethoscope className="h-7 w-7" />
+              <Shield className="h-7 w-7" />
             </div>
-            <h3 className="mb-3 text-xl font-bold text-slate-900">Expert Doctors</h3>
-            <p className="text-slate-600 leading-relaxed">Our team consists of highly qualified and experienced medical professionals across various specialties.</p>
+            <h3 className="mb-3 text-xl font-bold text-slate-900">Personalized Care</h3>
+            <p className="text-slate-600 leading-relaxed">Get dedicated attention and customized treatment plans tailored specifically to your orthopedic needs.</p>
           </div>
           <div className="group rounded-3xl border border-slate-100 bg-white p-8 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
             <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors">

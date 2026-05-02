@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Doctor } from '../types';
+import { sendAdminNotification } from '../lib/emailService';
 
 export const DoctorsListing = () => {
   const { user } = useAuth();
@@ -174,23 +175,18 @@ export const DoctorsListing = () => {
         createdAt: new Date().toISOString(),
       });
       
-      // Send Email Notification to Admin
+      // Send Email Notification to Admin via Client-side Service
       try {
-        await fetch('/api/appointments/notify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            patientName,
-            patientPhone: phoneNumber,
-            doctorName: bookingDoctor.name,
-            date: bookingDate,
-            time: bookingTime,
-            type: appointmentType,
-          }),
+        await sendAdminNotification({
+          patientName,
+          patientPhone: phoneNumber,
+          doctorName: bookingDoctor.name,
+          date: bookingDate,
+          time: bookingTime,
+          type: appointmentType,
         });
       } catch (emailError) {
         console.error('Email notification failed:', emailError);
-        // We don't toast error here because the booking itself was successful
       }
 
       toast.success('Appointment booked successfully!');
