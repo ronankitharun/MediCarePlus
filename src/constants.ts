@@ -1,5 +1,4 @@
 import { Department, Doctor, Medicine, LabPackage } from './types';
-import drSaiImage from './assets/dr-sai.jpg';
 
 export const DEPARTMENTS: Department[] = [
   {
@@ -20,7 +19,7 @@ export const DOCTORS: Doctor[] = [
     experience: 3,
     education: 'MS - Orthopaedics, AIIMS',
     bio: 'Expert in sports medicine and joint replacement surgeries.',
-    image: drSaiImage,
+    image: '/dr-sai.jpg',
     hospital: 'A One Hospital, Srikakulam, 532001',
     googleMapsUrl: 'https://maps.app.goo.gl/BopSTSxKmbu1QpZs9',
     availability: {
