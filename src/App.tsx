@@ -32,13 +32,13 @@ export default function App() {
               <Route path="/terms" element={<TermsOfService />} />
             </Routes>
           </main>
-          <footer className="border-t bg-white py-12">
+          <footer className="border-t bg-card py-12 transition-colors">
             <div className="container mx-auto px-4">
               <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div className="text-slate-500 text-sm">
+                <div className="text-muted-foreground text-sm">
                   &copy; 2026 Dr. Sai Theja Orthopedic Care. All rights reserved.
                 </div>
-                <div className="flex gap-8 text-sm font-medium text-slate-600">
+                <div className="flex gap-8 text-sm font-medium text-muted-foreground">
                   <Link to="/privacy" className="hover:text-emerald-600 transition-colors">Privacy Policy</Link>
                   <Link to="/terms" className="hover:text-emerald-600 transition-colors">Terms of Service</Link>
                 </div>

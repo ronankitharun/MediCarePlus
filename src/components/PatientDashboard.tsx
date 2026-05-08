@@ -235,59 +235,59 @@ export const PatientDashboard = () => {
 
       {/* Appointment Details Modal */}
       <Dialog open={!!selectedAppointment} onOpenChange={() => setSelectedAppointment(null)}>
-        <DialogContent className="sm:max-w-[450px] rounded-3xl">
+        <DialogContent className="sm:max-w-[450px] rounded-3xl bg-card border-border">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Appointment Details</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-foreground">Appointment Details</DialogTitle>
           </DialogHeader>
           
           {selectedAppointment && (
             <div className="flex flex-col gap-6 py-4">
-              <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <div className="flex items-center gap-4 p-4 rounded-2xl bg-muted/30 border border-border">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400">
                   <UserIcon className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-500">Doctor</p>
-                  <p className="text-lg font-bold text-slate-900">{selectedAppointment.doctorName}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Doctor</p>
+                  <p className="text-lg font-bold text-foreground">{selectedAppointment.doctorName}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl border border-slate-100">
-                  <div className="flex items-center gap-2 text-slate-500 mb-1">
+                <div className="p-4 rounded-2xl border border-border bg-muted/10">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <Calendar className="h-4 w-4" />
                     <span className="text-xs font-medium">Date</span>
                   </div>
-                  <p className="font-bold text-slate-900">{selectedAppointment.date}</p>
+                  <p className="font-bold text-foreground">{selectedAppointment.date}</p>
                 </div>
-                <div className="p-4 rounded-2xl border border-slate-100">
-                  <div className="flex items-center gap-2 text-slate-500 mb-1">
+                <div className="p-4 rounded-2xl border border-border bg-muted/10">
+                  <div className="flex items-center gap-2 text-muted-foreground mb-1">
                     <Clock className="h-4 w-4" />
                     <span className="text-xs font-medium">Time</span>
                   </div>
-                  <p className="font-bold text-slate-900">{selectedAppointment.time}</p>
+                  <p className="font-bold text-foreground">{selectedAppointment.time}</p>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-slate-50">
-                  <span className="text-sm text-slate-500">Type</span>
-                  <Badge variant="outline" className="uppercase text-[10px]">{selectedAppointment.type}</Badge>
+                <div className="flex items-center justify-between py-2 border-b border-border">
+                  <span className="text-sm text-muted-foreground">Type</span>
+                  <Badge variant="outline" className="uppercase text-[10px] border-border text-foreground">{selectedAppointment.type}</Badge>
                 </div>
-                <div className="flex items-center justify-between py-2 border-b border-slate-50">
-                  <span className="text-sm text-slate-500">Status</span>
+                <div className="flex items-center justify-between py-2 border-b border-border">
+                  <span className="text-sm text-muted-foreground">Status</span>
                   <Badge className={`rounded-full px-3 py-0.5 text-xs font-semibold ${
-                    selectedAppointment.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
-                    selectedAppointment.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                    'bg-slate-100 text-slate-700'
+                    selectedAppointment.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300' :
+                    selectedAppointment.status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300' :
+                    'bg-muted text-muted-foreground'
                   }`}>
                     {selectedAppointment.status}
                   </Badge>
                 </div>
                 {selectedAppointment.paymentStatus === 'paid' && (
-                  <div className="flex items-center justify-between py-2 border-b border-slate-50">
-                    <span className="text-sm text-slate-500">Payment</span>
-                    <span className="text-sm font-bold text-emerald-600">Paid (₹{selectedAppointment.amount})</span>
+                  <div className="flex items-center justify-between py-2 border-b border-border">
+                    <span className="text-sm text-muted-foreground">Payment</span>
+                    <span className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Paid (₹{selectedAppointment.amount})</span>
                   </div>
                 )}
               </div>
@@ -295,10 +295,9 @@ export const PatientDashboard = () => {
               <div className="flex flex-col gap-3 mt-2">
                 {selectedAppointment.type === 'online' && selectedAppointment.status === 'confirmed' && (
                   <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-6 font-bold"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-6 font-bold shadow-lg shadow-blue-100 dark:shadow-none"
                     onClick={() => {
                       toast.info('Joining consultation call...');
-                      // In a real app, this would redirect to a video/audio call room
                     }}
                   >
                     <Video className="h-5 w-5 mr-2" /> Join Consultation Call
@@ -308,7 +307,7 @@ export const PatientDashboard = () => {
                 {selectedAppointment.status === 'pending' && (
                   <Button 
                     variant="outline"
-                    className="w-full border-red-200 text-red-600 hover:bg-red-50 rounded-xl py-6 font-bold"
+                    className="w-full border-red-200 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl py-6 font-bold"
                     onClick={() => handleCancelAppointment(selectedAppointment.id)}
                     disabled={isCancelling}
                   >
@@ -318,7 +317,7 @@ export const PatientDashboard = () => {
 
                 <Button 
                   variant="ghost"
-                  className="w-full text-slate-500 rounded-xl"
+                  className="w-full text-muted-foreground hover:text-foreground rounded-xl"
                   onClick={() => setSelectedAppointment(null)}
                 >
                   Close

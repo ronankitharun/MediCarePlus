@@ -351,15 +351,15 @@ export const AdminPanel = () => {
         {/* Appointments Management */}
         {activeTab === 'appointments' ? (
           <div className="lg:col-span-4">
-            <Card className="rounded-3xl border-slate-100 shadow-sm overflow-hidden">
-              <CardHeader className="border-b bg-slate-50/50 px-8 py-6 flex flex-row items-center justify-between">
-                <CardTitle className="text-xl font-bold">Manage Appointments</CardTitle>
+            <Card className="rounded-3xl border-border bg-card shadow-sm overflow-hidden">
+              <CardHeader className="border-b bg-muted/30 px-8 py-6 flex flex-row items-center justify-between">
+                <CardTitle className="text-xl font-bold text-foreground">Manage Appointments</CardTitle>
                 <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input 
                     type="text" 
                     placeholder="Search appointments..." 
-                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -368,21 +368,21 @@ export const AdminPanel = () => {
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="px-8">Patient</TableHead>
-                      <TableHead>Doctor</TableHead>
-                      <TableHead>Date & Time</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right px-8">Actions</TableHead>
+                    <TableRow className="hover:bg-transparent border-border">
+                      <TableHead className="px-8 text-muted-foreground">Patient</TableHead>
+                      <TableHead className="text-muted-foreground">Doctor</TableHead>
+                      <TableHead className="text-muted-foreground">Date & Time</TableHead>
+                      <TableHead className="text-muted-foreground">Status</TableHead>
+                      <TableHead className="text-right px-8 text-muted-foreground">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredAppointments.map((apt) => (
-                      <TableRow key={apt.id} className="hover:bg-slate-50/50">
+                      <TableRow key={apt.id} className="hover:bg-muted/30 border-border">
                         <TableCell className="px-8 py-4">
                           <div className="flex flex-col">
-                            <span className="font-semibold text-slate-900">{apt.patientName}</span>
-                            <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <span className="font-semibold text-foreground">{apt.patientName}</span>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <span>Age: {apt.patientAge}</span>
                               <span>•</span>
                               <span>{apt.patientPhone}</span>
@@ -390,19 +390,19 @@ export const AdminPanel = () => {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-slate-600">{apt.doctorName}</span>
+                          <span className="text-muted-foreground">{apt.doctorName}</span>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="text-sm font-medium text-slate-900">{apt.date}</span>
-                            <span className="text-xs text-slate-500">{apt.time}</span>
+                            <span className="text-sm font-medium text-foreground">{apt.date}</span>
+                            <span className="text-xs text-muted-foreground">{apt.time}</span>
                             <Badge variant="outline" className={`mt-1 w-fit text-[10px] uppercase ${
-                              apt.type === 'online' ? 'border-blue-200 text-blue-600 bg-blue-50' : 'border-slate-200 text-slate-600 bg-slate-50'
+                              apt.type === 'online' ? 'border-blue-200 text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-border text-muted-foreground bg-muted/20'
                             }`}>
                               {apt.type}
                             </Badge>
                             {apt.paymentStatus === 'paid' && (
-                              <Badge variant="outline" className="mt-1 w-fit text-[10px] uppercase border-emerald-200 text-emerald-600 bg-emerald-50">
+                              <Badge variant="outline" className="mt-1 w-fit text-[10px] uppercase border-emerald-200 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20">
                                 Paid: ₹{apt.amount}
                               </Badge>
                             )}
@@ -410,10 +410,10 @@ export const AdminPanel = () => {
                         </TableCell>
                         <TableCell>
                           <Select value={apt.status} onValueChange={(val) => handleStatusUpdate(apt.id, val)}>
-                            <SelectTrigger className="w-[140px] h-9 rounded-full border-slate-200 text-xs font-semibold">
+                            <SelectTrigger className="w-[140px] h-9 rounded-full border-border bg-background text-xs font-semibold text-foreground">
                               <SelectValue />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-popover border-border">
                               <SelectItem value="pending">Pending</SelectItem>
                               <SelectItem value="confirmed">Confirmed</SelectItem>
                               <SelectItem value="completed">Completed</SelectItem>
@@ -424,7 +424,7 @@ export const AdminPanel = () => {
                         <TableCell className="text-right px-8">
                           <button 
                             onClick={() => handleDeleteAppointment(apt.id)}
-                            className="text-slate-400 hover:text-red-600 transition-colors"
+                            className="text-muted-foreground hover:text-red-600 transition-colors"
                           >
                             <Trash2 className="h-5 w-5" />
                           </button>
@@ -438,15 +438,15 @@ export const AdminPanel = () => {
           </div>
         ) : (
           <div className="lg:col-span-4">
-            <Card className="rounded-3xl border-slate-100 shadow-sm overflow-hidden">
-              <CardHeader className="border-b bg-slate-50/50 px-8 py-6 flex flex-row items-center justify-between">
-                <CardTitle className="text-xl font-bold">Patient Records & Reports</CardTitle>
+            <Card className="rounded-3xl border-border bg-card shadow-sm overflow-hidden">
+              <CardHeader className="border-b bg-muted/30 px-8 py-6 flex flex-row items-center justify-between">
+                <CardTitle className="text-xl font-bold text-foreground">Patient Records & Reports</CardTitle>
                 <div className="relative w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input 
                     type="text" 
                     placeholder="Search patients..." 
-                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-10 pr-4 py-2 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -455,36 +455,36 @@ export const AdminPanel = () => {
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
-                    <TableRow className="hover:bg-transparent">
-                      <TableHead className="px-8">Patient Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Joined Date</TableHead>
-                      <TableHead className="text-right px-8">Actions</TableHead>
+                    <TableRow className="hover:bg-transparent border-border">
+                      <TableHead className="px-8 text-muted-foreground">Patient Name</TableHead>
+                      <TableHead className="text-muted-foreground">Email</TableHead>
+                      <TableHead className="text-muted-foreground">Joined Date</TableHead>
+                      <TableHead className="text-right px-8 text-muted-foreground">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredPatients.map((p) => (
-                      <TableRow key={p.uid} className="hover:bg-slate-50/50">
+                      <TableRow key={p.uid} className="hover:bg-muted/30 border-border">
                         <TableCell className="px-8 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
                               <UserIcon className="h-5 w-5" />
                             </div>
-                            <span className="font-semibold text-slate-900">{p.displayName}</span>
+                            <span className="font-semibold text-foreground">{p.displayName}</span>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <span className="text-slate-600">{p.email}</span>
+                          <span className="text-muted-foreground">{p.email}</span>
                         </TableCell>
                         <TableCell>
-                          <span className="text-slate-600">{new Date(p.createdAt).toLocaleDateString()}</span>
+                          <span className="text-muted-foreground">{new Date(p.createdAt).toLocaleDateString()}</span>
                         </TableCell>
                         <TableCell className="text-right px-8">
                           <div className="flex justify-end gap-2">
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              className="rounded-full text-slate-600 hover:text-emerald-600 hover:bg-emerald-50"
+                              className="rounded-full text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                               onClick={() => setViewingReportsPatient(p)}
                             >
                               <FileText className="h-4 w-4 mr-2" /> View Reports
@@ -492,7 +492,7 @@ export const AdminPanel = () => {
                             <Button 
                               variant="outline" 
                               size="sm" 
-                              className="rounded-full border-emerald-600 text-emerald-600 hover:bg-emerald-50"
+                              className="rounded-full border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
                               onClick={() => setSelectedPatient(p)}
                             >
                               <Plus className="h-4 w-4 mr-2" /> Add Report
@@ -511,33 +511,33 @@ export const AdminPanel = () => {
 
       {/* Add Report Dialog */}
       <Dialog open={!!selectedPatient} onOpenChange={() => setSelectedPatient(null)}>
-        <DialogContent className="sm:max-w-[425px] rounded-3xl">
+        <DialogContent className="sm:max-w-[425px] rounded-3xl bg-card border-border">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Add Medical Report</DialogTitle>
-            <p className="text-slate-500 text-sm">Uploading for: <span className="font-bold text-emerald-600">{selectedPatient?.displayName}</span></p>
+            <DialogTitle className="text-2xl font-bold text-foreground">Add Medical Report</DialogTitle>
+            <p className="text-muted-foreground text-sm">Uploading for: <span className="font-bold text-emerald-600">{selectedPatient?.displayName}</span></p>
           </DialogHeader>
           <div className="grid gap-6 py-4">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-slate-700">Report Title</label>
+              <label className="text-sm font-semibold text-foreground">Report Title</label>
               <input 
                 type="text" 
                 placeholder="e.g. Blood Test Result"
-                className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="flex h-12 w-full rounded-xl border border-border bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-muted-foreground"
                 value={reportTitle}
                 onChange={(e) => setReportTitle(e.target.value)}
               />
             </div>
 
-            <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
+            <div className="flex gap-2 p-1 bg-muted/40 rounded-xl">
               <button 
                 onClick={() => setUploadMode('file')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${uploadMode === 'file' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${uploadMode === 'file' ? 'bg-card text-emerald-600 shadow-sm border border-border/50' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 File Upload
               </button>
               <button 
                 onClick={() => setUploadMode('url')}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${uploadMode === 'url' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${uploadMode === 'url' ? 'bg-card text-emerald-600 shadow-sm border border-border/50' : 'text-muted-foreground hover:text-foreground'}`}
               >
                 Manual URL
               </button>
@@ -545,7 +545,7 @@ export const AdminPanel = () => {
 
             {uploadMode === 'file' ? (
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-slate-700">Select Report File (PDF/Image)</label>
+                <label className="text-sm font-semibold text-foreground">Select Report File (PDF/Image)</label>
                 <div className="relative">
                   <input 
                     type="file" 
@@ -557,17 +557,17 @@ export const AdminPanel = () => {
                   <label 
                     htmlFor="report-file-upload"
                     className={`flex h-24 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-all ${
-                      selectedFile ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 hover:border-emerald-500 hover:bg-slate-50'
+                      selectedFile ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' : 'border-border hover:border-emerald-500 hover:bg-muted/30'
                     }`}
                   >
-                    <Plus className={`h-6 w-6 mb-2 ${selectedFile ? 'text-emerald-600' : 'text-slate-400'}`} />
-                    <span className="text-xs font-medium text-slate-600">
+                    <Plus className={`h-6 w-6 mb-2 ${selectedFile ? 'text-emerald-600' : 'text-muted-foreground'}`} />
+                    <span className="text-xs font-medium text-foreground">
                       {selectedFile ? selectedFile.name : 'Click to select file'}
                     </span>
                   </label>
                 </div>
                 {uploadProgress > 0 && (
-                  <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                  <div className="w-full bg-muted rounded-full h-1.5 mt-2 overflow-hidden">
                     <div 
                       className="bg-emerald-600 h-full transition-all duration-300" 
                       style={{ width: `${uploadProgress}%` }}
@@ -577,15 +577,15 @@ export const AdminPanel = () => {
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-slate-700">Report URL (PDF/Image)</label>
+                <label className="text-sm font-semibold text-foreground">Report URL (PDF/Image)</label>
                 <input 
                   type="url" 
                   placeholder="https://example.com/report.pdf"
-                  className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="flex h-12 w-full rounded-xl border border-border bg-background px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder:text-muted-foreground"
                   value={reportUrl}
                   onChange={(e) => setReportUrl(e.target.value)}
                 />
-                <p className="text-[10px] text-slate-400">Paste a link from Google Drive, Dropbox, or any file host.</p>
+                <p className="text-[10px] text-muted-foreground">Paste a link from Google Drive, Dropbox, or any file host.</p>
               </div>
             )}
           </div>
@@ -593,7 +593,7 @@ export const AdminPanel = () => {
             <Button 
               onClick={handleAddReport} 
               disabled={isAddingReport}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-6 text-lg font-semibold"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-6 text-lg font-semibold shadow-lg shadow-emerald-200 dark:shadow-none"
             >
               {isAddingReport ? 'Processing...' : 'Save Report Record'}
             </Button>
@@ -603,42 +603,42 @@ export const AdminPanel = () => {
 
       {/* View Reports Dialog */}
       <Dialog open={!!viewingReportsPatient} onOpenChange={() => setViewingReportsPatient(null)}>
-        <DialogContent className="sm:max-w-[600px] rounded-3xl">
+        <DialogContent className="sm:max-w-[600px] rounded-3xl bg-card border-border">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Patient Medical Reports</DialogTitle>
-            <p className="text-slate-500 text-sm">Viewing records for: <span className="font-bold text-emerald-600">{viewingReportsPatient?.displayName}</span></p>
+            <DialogTitle className="text-2xl font-bold text-foreground">Patient Medical Reports</DialogTitle>
+            <p className="text-muted-foreground text-sm">Viewing records for: <span className="font-bold text-emerald-600">{viewingReportsPatient?.displayName}</span></p>
           </DialogHeader>
           <div className="py-4 max-h-[400px] overflow-y-auto">
             {reports.filter(r => r.patientId === viewingReportsPatient?.uid).length === 0 ? (
-              <div className="py-12 text-center text-slate-500">
+              <div className="py-12 text-center text-muted-foreground">
                 <FileText className="h-12 w-12 mx-auto mb-4 opacity-20" />
                 <p>No reports found for this patient.</p>
               </div>
             ) : (
               <div className="flex flex-col gap-3">
                 {reports.filter(r => r.patientId === viewingReportsPatient?.uid).map((report) => (
-                  <div key={report.id} className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white transition-all group">
+                  <div key={report.id} className="flex items-center justify-between p-4 rounded-2xl border border-border bg-muted/20 hover:bg-muted/40 transition-all group">
                     <div className="flex items-center gap-4 flex-1 min-w-0">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
                         <FileText className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-slate-900 truncate">{report.title}</p>
-                        <p className="text-xs text-slate-500">{new Date(report.uploadedAt).toLocaleDateString()}</p>
+                        <p className="font-semibold text-foreground truncate">{report.title}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(report.uploadedAt).toLocaleDateString()}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="h-9 w-9 p-0 text-slate-400 hover:text-emerald-600"
+                        className="h-9 w-9 p-0 text-muted-foreground hover:text-emerald-600"
                         onClick={() => window.open(report.fileUrl, '_blank', 'noopener,noreferrer')}
                       >
                         <Eye className="h-5 w-5" />
                       </Button>
                       <button 
                         onClick={() => handleDeleteReport(report.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 transition-colors"
+                        className="p-2 text-muted-foreground hover:text-red-600 transition-colors"
                         title="Delete Report"
                       >
                         <Trash2 className="h-5 w-5" />
@@ -653,7 +653,7 @@ export const AdminPanel = () => {
             <Button 
               variant="outline"
               onClick={() => setViewingReportsPatient(null)}
-              className="w-full rounded-xl py-6 text-lg font-semibold"
+              className="w-full rounded-xl py-6 text-lg font-semibold border-border text-foreground hover:bg-muted"
             >
               Close
             </Button>
@@ -662,39 +662,39 @@ export const AdminPanel = () => {
       </Dialog>
       {/* Entity Modal */}
       <Dialog open={isEntityModalOpen} onOpenChange={() => setIsEntityModalOpen(false)}>
-        <DialogContent className="sm:max-w-[700px] rounded-3xl overflow-y-auto max-h-[90vh]">
+        <DialogContent className="sm:max-w-[700px] rounded-3xl overflow-y-auto max-h-[90vh] bg-card border-border">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
+            <DialogTitle className="text-2xl font-bold text-foreground">
               {editingEntity ? 'Edit' : 'Add'} {entityType === 'doctor' ? 'Doctor' : entityType === 'medicine' ? 'Medicine' : 'Lab Package'}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSaveEntity} className="grid grid-cols-2 gap-4 py-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold text-slate-700">Display Name</label>
-              <input name="name" defaultValue={editingEntity?.name} required className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <label className="text-sm font-semibold text-foreground">Display Name</label>
+              <input name="name" defaultValue={editingEntity?.name} required className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
 
             {entityType === 'doctor' && (
               <>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Specialty</label>
-                  <input name="specialty" defaultValue={editingEntity?.specialty} required className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Specialty</label>
+                  <input name="specialty" defaultValue={editingEntity?.specialty} required className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Experience (Years)</label>
-                  <input name="experience" type="number" defaultValue={editingEntity?.experience} required className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Experience (Years)</label>
+                  <input name="experience" type="number" defaultValue={editingEntity?.experience} required className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Education</label>
-                  <input name="education" defaultValue={editingEntity?.education} className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Education</label>
+                  <input name="education" defaultValue={editingEntity?.education} className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Hospital</label>
-                  <input name="hospital" defaultValue={editingEntity?.hospital} className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Hospital</label>
+                  <input name="hospital" defaultValue={editingEntity?.hospital} className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="col-span-2 flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Bio</label>
-                  <textarea name="bio" defaultValue={editingEntity?.bio} className="h-20 rounded-lg border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Bio</label>
+                  <textarea name="bio" defaultValue={editingEntity?.bio} className="h-20 rounded-lg border border-border bg-background p-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
               </>
             )}
@@ -702,28 +702,28 @@ export const AdminPanel = () => {
             {entityType === 'medicine' && (
               <>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Brand Name</label>
-                  <input name="brandName" defaultValue={editingEntity?.brandName} required className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Brand Name</label>
+                  <input name="brandName" defaultValue={editingEntity?.brandName} required className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Generic Name</label>
-                  <input name="genericName" defaultValue={editingEntity?.genericName} required className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Generic Name</label>
+                  <input name="genericName" defaultValue={editingEntity?.genericName} required className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Price (₹)</label>
-                  <input name="price" type="number" step="0.01" defaultValue={editingEntity?.price} required className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Price (₹)</label>
+                  <input name="price" type="number" step="0.01" defaultValue={editingEntity?.price} required className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Stock</label>
-                  <input name="stock" type="number" defaultValue={editingEntity?.stock} required className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Stock</label>
+                  <input name="stock" type="number" defaultValue={editingEntity?.stock} required className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Manufacturer</label>
-                  <input name="manufacturer" defaultValue={editingEntity?.manufacturer} className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Manufacturer</label>
+                  <input name="manufacturer" defaultValue={editingEntity?.manufacturer} className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Category (otc / prescription)</label>
-                  <input name="category" defaultValue={editingEntity?.category || 'otc'} className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Category (otc / prescription)</label>
+                  <input name="category" defaultValue={editingEntity?.category || 'otc'} className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
               </>
             )}
@@ -731,49 +731,49 @@ export const AdminPanel = () => {
             {entityType === 'lab' && (
               <>
                 <div className="col-span-2 flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Description</label>
-                  <textarea name="description" defaultValue={editingEntity?.description} required className="h-20 rounded-lg border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Description</label>
+                  <textarea name="description" defaultValue={editingEntity?.description} required className="h-20 rounded-lg border border-border bg-background p-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Parameters (Comma separated)</label>
-                  <input name="parameters" defaultValue={editingEntity?.parameters?.join(', ')} required className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Parameters (Comma separated)</label>
+                  <input name="parameters" defaultValue={editingEntity?.parameters?.join(', ')} required className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Category</label>
-                  <input name="category" defaultValue={editingEntity?.category} className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Category</label>
+                  <input name="category" defaultValue={editingEntity?.category} className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-slate-700">Sample Required</label>
-                  <input name="sampleRequired" defaultValue={editingEntity?.sampleRequired} className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+                  <label className="text-sm font-semibold text-foreground">Sample Required</label>
+                  <input name="sampleRequired" defaultValue={editingEntity?.sampleRequired} className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
                 </div>
               </>
             )}
 
             <div className="col-span-2 flex flex-col gap-1.5">
-              <label className="text-sm font-semibold text-slate-700">Image URL</label>
-              <input name="image" defaultValue={editingEntity?.image} required className="h-10 rounded-lg border border-slate-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <label className="text-sm font-semibold text-foreground">Image URL</label>
+              <input name="image" defaultValue={editingEntity?.image} required className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
 
             {entityType === 'lab' && (
               <div className="col-span-2 flex gap-6 mt-2">
-                <label className="flex items-center gap-2 text-sm text-slate-700">
-                  <input type="checkbox" name="fastingRequired" defaultChecked={editingEntity?.fastingRequired} /> Fasting Required
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input type="checkbox" name="fastingRequired" defaultChecked={editingEntity?.fastingRequired} className="rounded border-border bg-background" /> Fasting Required
                 </label>
-                <label className="flex items-center gap-2 text-sm text-slate-700">
-                  <input type="checkbox" name="isHomeCollectionAvailable" defaultChecked={editingEntity?.isHomeCollectionAvailable} /> Home Collection Available
+                <label className="flex items-center gap-2 text-sm text-foreground">
+                  <input type="checkbox" name="isHomeCollectionAvailable" defaultChecked={editingEntity?.isHomeCollectionAvailable} className="rounded border-border bg-background" /> Home Collection Available
                 </label>
               </div>
             )}
 
             {entityType === 'medicine' && (
-              <label className="flex items-center gap-2 text-sm text-slate-700 col-span-2 mt-2">
-                <input type="checkbox" name="prescriptionRequired" defaultChecked={editingEntity?.prescriptionRequired} /> Prescription Required
+              <label className="flex items-center gap-2 text-sm text-foreground col-span-2 mt-2">
+                <input type="checkbox" name="prescriptionRequired" defaultChecked={editingEntity?.prescriptionRequired} className="rounded border-border bg-background" /> Prescription Required
               </label>
             )}
 
             <div className="col-span-2 mt-6 flex gap-3">
-              <Button type="button" variant="outline" className="flex-1 rounded-xl h-12" onClick={() => setIsEntityModalOpen(false)}>Cancel</Button>
-              <Button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12">Save {entityType}</Button>
+              <Button type="button" variant="outline" className="flex-1 rounded-xl h-12 border-border text-foreground hover:bg-muted" onClick={() => setIsEntityModalOpen(false)}>Cancel</Button>
+              <Button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl h-12 shadow-lg shadow-emerald-200 dark:shadow-none">Save {entityType}</Button>
             </div>
           </form>
         </DialogContent>

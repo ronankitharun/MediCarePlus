@@ -206,16 +206,16 @@ export const DoctorsListing = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12 transition-colors duration-300">
       <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Our Expert <span className="text-emerald-600">Doctors</span></h1>
-          <p className="text-slate-600 mt-2">Find and book appointments with the best medical specialists.</p>
+          <h1 className="text-4xl font-bold text-foreground tracking-tight">Our Expert <span className="text-emerald-600">Doctors</span></h1>
+          <p className="text-muted-foreground mt-2">Find and book appointments with the best medical specialists.</p>
         </div>
         <div className="flex items-center gap-4">
-          <Filter className="h-5 w-5 text-slate-400" />
+          <Filter className="h-5 w-5 text-muted-foreground opacity-60" />
           <Select value={selectedDept} onValueChange={setSelectedDept}>
-            <SelectTrigger className="w-[200px] rounded-xl border-slate-200">
+            <SelectTrigger className="w-[200px] rounded-xl border-border bg-card">
               <SelectValue placeholder="Filter by Department" />
             </SelectTrigger>
             <SelectContent>
@@ -236,7 +236,7 @@ export const DoctorsListing = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: index * 0.1 }}
           >
-            <Card className="group overflow-hidden rounded-3xl border-slate-100 shadow-sm transition-all hover:shadow-xl">
+            <Card className="group overflow-hidden rounded-3xl border-border bg-card shadow-sm transition-all hover:shadow-xl">
               <div className="relative h-64 overflow-hidden">
                 <img 
                   src={doctor.image} 
@@ -244,13 +244,13 @@ export const DoctorsListing = () => {
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
-                <Badge className="absolute top-4 right-4 bg-white/90 text-emerald-600 hover:bg-white backdrop-blur-sm border-none px-3 py-1">
+                <Badge className="absolute top-4 right-4 bg-background/90 text-emerald-600 hover:bg-background backdrop-blur-sm border-none px-3 py-1">
                   {doctor.experience} Years Exp.
                 </Badge>
               </div>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
-                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-none">
+                  <Badge variant="secondary" className="bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border-none">
                     {DEPARTMENTS.find(d => d.id === doctor.departmentId)?.name}
                   </Badge>
                   <div className="flex items-center gap-1 text-amber-500">
@@ -258,13 +258,13 @@ export const DoctorsListing = () => {
                     <span className="text-sm font-bold">4.9</span>
                   </div>
                 </div>
-                <CardTitle className="text-2xl font-bold text-slate-900 mt-2">{doctor.name}</CardTitle>
+                <CardTitle className="text-2xl font-bold text-foreground mt-2">{doctor.name}</CardTitle>
                 <CardDescription className="text-emerald-600 font-medium">{doctor.specialty}</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-6">
-                <p className="text-sm text-slate-600 line-clamp-2 leading-relaxed">{doctor.bio}</p>
+                <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{doctor.bio}</p>
                 <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between text-sm text-slate-500">
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
                       <span>{doctor.hospital || 'MediCare Plus Main Hospital'}</span>
@@ -281,14 +281,14 @@ export const DoctorsListing = () => {
                       </a>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Clock className="h-4 w-4" />
                     <span>Available: Mon - Sat</span>
                   </div>
                 </div>
                 <Button 
                   onClick={() => handleBookClick(doctor)}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-6 text-lg font-semibold shadow-lg shadow-emerald-100"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-6 text-lg font-semibold shadow-lg shadow-emerald-100 dark:shadow-none"
                 >
                   Book Appointment
                 </Button>
@@ -300,46 +300,46 @@ export const DoctorsListing = () => {
 
       {/* Booking Dialog */}
       <Dialog open={!!bookingDoctor} onOpenChange={() => setBookingDoctor(null)}>
-        <DialogContent className="sm:max-w-[425px] rounded-3xl">
+        <DialogContent className="sm:max-w-[425px] rounded-3xl bg-card border-border">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">Book Appointment</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-2xl font-bold text-foreground">Book Appointment</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Schedule your visit with {bookingDoctor?.name}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-6 py-4">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-slate-700">Select Date</label>
+              <label className="text-sm font-semibold text-foreground">Select Date</label>
               <input 
                 type="date" 
-                className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="flex h-12 w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 value={bookingDate}
                 onChange={(e) => setBookingDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-slate-700">Select Time Slot</label>
+              <label className="text-sm font-semibold text-foreground">Select Time Slot</label>
               <Select value={bookingTime} onValueChange={setBookingTime}>
-                <SelectTrigger className="h-12 rounded-xl border-slate-200">
+                <SelectTrigger className="h-12 rounded-xl border-border bg-card text-foreground">
                   <SelectValue placeholder="Choose a time" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-card border-border">
                   {['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '03:00 PM', '04:00 PM'].map(time => (
-                    <SelectItem key={time} value={time}>{time}</SelectItem>
+                    <SelectItem key={time} value={time} className="text-foreground">{time}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-slate-700">Appointment Type</label>
+              <label className="text-sm font-semibold text-foreground">Appointment Type</label>
               <div className="flex gap-4">
                 <button
                   onClick={() => setAppointmentType('offline')}
                   className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
                     appointmentType === 'offline'
-                      ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
-                      : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'
+                      ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                      : 'border-border bg-card text-muted-foreground hover:border-emerald-200 dark:hover:border-emerald-900/50'
                   } font-semibold text-sm`}
                 >
                   In-Person (Offline)
@@ -348,37 +348,37 @@ export const DoctorsListing = () => {
                   onClick={() => setAppointmentType('online')}
                   className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
                     appointmentType === 'online'
-                      ? 'border-emerald-600 bg-emerald-50 text-emerald-700'
-                      : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200'
+                      ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                      : 'border-border bg-card text-muted-foreground hover:border-emerald-200 dark:hover:border-emerald-900/50'
                   } font-semibold text-sm`}
                 >
                   Call (Online)
                 </button>
               </div>
               {appointmentType === 'online' && (
-                <div className="mt-2 p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-center justify-between">
-                  <span className="text-sm font-medium text-blue-700">Consultation Fee</span>
-                  <span className="text-lg font-bold text-blue-800">₹200</span>
+                <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30 flex items-center justify-between">
+                  <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Consultation Fee</span>
+                  <span className="text-lg font-bold text-blue-800 dark:text-blue-300">₹200</span>
                 </div>
               )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-slate-700">Patient Name</label>
+                <label className="text-sm font-semibold text-foreground">Patient Name</label>
                 <input 
                   type="text" 
                   placeholder="Full Name"
-                  className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="flex h-12 w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   value={patientName}
                   onChange={(e) => setPatientName(e.target.value)}
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-slate-700">Age</label>
+                <label className="text-sm font-semibold text-foreground">Age</label>
                 <input 
                   type="number" 
                   placeholder="Age"
-                  className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="flex h-12 w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   value={patientAge}
                   onChange={(e) => setPatientAge(e.target.value)}
                   min="0"
@@ -387,23 +387,23 @@ export const DoctorsListing = () => {
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-slate-700">Phone Number</label>
+              <label className="text-sm font-semibold text-foreground">Phone Number</label>
               <input 
                 type="tel" 
                 placeholder="10-digit phone number"
                 maxLength={10}
-                className="flex h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="flex h-12 w-full rounded-xl border border-border bg-card px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
               />
-              <p className="text-xs text-slate-500">Enter exactly 10 digits (e.g., 9876543210)</p>
+              <p className="text-xs text-muted-foreground">Enter exactly 10 digits (e.g., 9876543210)</p>
             </div>
           </div>
           <DialogFooter>
             <Button 
               onClick={handleConfirmBooking}
               disabled={isProcessing}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-6 text-lg font-semibold"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl py-6 text-lg font-semibold shadow-lg shadow-emerald-100 dark:shadow-none"
             >
               {isProcessing ? 'Processing...' : appointmentType === 'online' ? 'Pay ₹200 & Confirm' : 'Confirm Appointment'}
             </Button>
