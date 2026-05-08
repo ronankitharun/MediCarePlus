@@ -71,45 +71,45 @@ export const PatientDashboard = () => {
   if (!user) return <div className="p-20 text-center">Please login to view your dashboard.</div>;
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12 transition-colors duration-300">
       <div className="mb-12">
-        <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Welcome back, <span className="text-emerald-600">{user.displayName}</span></h1>
-        <p className="text-slate-600 mt-2">Manage your health records and upcoming appointments.</p>
+        <h1 className="text-4xl font-bold text-foreground tracking-tight">Welcome back, <span className="text-emerald-600">{user.displayName}</span></h1>
+        <p className="text-muted-foreground mt-2">Manage your health records and upcoming appointments.</p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Stats Section */}
         <div className="lg:col-span-3 grid gap-6 md:grid-cols-3">
-          <Card className="rounded-3xl border-slate-100 shadow-sm">
+          <Card className="rounded-3xl border-border shadow-sm bg-card transition-colors">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
                 <Calendar className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Appointments</p>
-                <p className="text-2xl font-bold text-slate-900">{appointments.length}</p>
+                <p className="text-sm font-medium text-muted-foreground">Appointments</p>
+                <p className="text-2xl font-bold text-foreground">{appointments.length}</p>
               </div>
             </CardContent>
           </Card>
-          <Card className="rounded-3xl border-slate-100 shadow-sm">
+          <Card className="rounded-3xl border-border shadow-sm bg-card transition-colors">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
                 <FileText className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Reports</p>
-                <p className="text-2xl font-bold text-slate-900">{reports.length}</p>
+                <p className="text-sm font-medium text-muted-foreground">Reports</p>
+                <p className="text-2xl font-bold text-foreground">{reports.length}</p>
               </div>
             </CardContent>
           </Card>
-          <Card className="rounded-3xl border-slate-100 shadow-sm">
+          <Card className="rounded-3xl border-border shadow-sm bg-card transition-colors">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
                 <Activity className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Health Status</p>
-                <p className="text-2xl font-bold text-slate-900">Good</p>
+                <p className="text-sm font-medium text-muted-foreground">Health Status</p>
+                <p className="text-2xl font-bold text-foreground">Good</p>
               </div>
             </CardContent>
           </Card>
@@ -118,47 +118,47 @@ export const PatientDashboard = () => {
         {/* Main Content Grid */}
         <div className="lg:col-span-2 space-y-8">
           {/* Appointments Table */}
-          <Card className="rounded-3xl border-slate-100 shadow-sm overflow-hidden">
-            <CardHeader className="border-b bg-slate-50/50 px-8 py-6">
-              <CardTitle className="text-xl font-bold">Upcoming Appointments</CardTitle>
+          <Card className="rounded-3xl border-border shadow-sm overflow-hidden bg-card transition-colors">
+            <CardHeader className="border-b bg-muted/30 px-8 py-6">
+              <CardTitle className="text-xl font-bold text-foreground">Upcoming Appointments</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="px-8">Doctor</TableHead>
-                    <TableHead>Date & Time</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right px-8">Action</TableHead>
+                  <TableRow className="hover:bg-transparent border-border">
+                    <TableHead className="px-8 text-muted-foreground">Doctor</TableHead>
+                    <TableHead className="text-muted-foreground">Date & Time</TableHead>
+                    <TableHead className="text-muted-foreground">Status</TableHead>
+                    <TableHead className="text-right px-8 text-muted-foreground">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {appointments.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-32 text-center text-slate-500">No appointments found.</TableCell>
+                      <TableCell colSpan={4} className="h-32 text-center text-muted-foreground border-border">No appointments found.</TableCell>
                     </TableRow>
                   ) : (
                     appointments.map((apt) => (
-                      <TableRow key={apt.id} className="group hover:bg-slate-50/50">
+                      <TableRow key={apt.id} className="group hover:bg-muted/30 transition-colors border-border">
                         <TableCell className="px-8 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
                               <UserIcon className="h-5 w-5" />
                             </div>
-                            <span className="font-semibold text-slate-900">{apt.doctorName}</span>
+                            <span className="font-semibold text-foreground">{apt.doctorName}</span>
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="text-sm font-medium text-slate-900">{apt.date}</span>
-                            <span className="text-xs text-slate-500">{apt.time}</span>
+                            <span className="text-sm font-medium text-foreground">{apt.date}</span>
+                            <span className="text-xs text-muted-foreground">{apt.time}</span>
                             <Badge variant="outline" className={`mt-1 w-fit text-[10px] uppercase ${
-                              apt.type === 'online' ? 'border-blue-200 text-blue-600 bg-blue-50' : 'border-slate-200 text-slate-600 bg-slate-50'
+                              apt.type === 'online' ? 'border-blue-200 text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-border text-muted-foreground bg-muted/20'
                             }`}>
                               {apt.type}
                             </Badge>
                             {apt.paymentStatus === 'paid' && (
-                              <Badge variant="outline" className="mt-1 w-fit text-[10px] uppercase border-emerald-200 text-emerald-600 bg-emerald-50">
+                              <Badge variant="outline" className="mt-1 w-fit text-[10px] uppercase border-emerald-200 text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20">
                                 Paid: ₹{apt.amount}
                               </Badge>
                             )}
@@ -166,9 +166,9 @@ export const PatientDashboard = () => {
                         </TableCell>
                         <TableCell>
                           <Badge className={`rounded-full px-3 py-0.5 text-xs font-semibold ${
-                            apt.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
-                            apt.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                            'bg-slate-100 text-slate-700'
+                            apt.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300' :
+                            apt.status === 'pending' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300' :
+                            'bg-muted text-muted-foreground'
                           }`}>
                             {apt.status}
                           </Badge>
@@ -176,7 +176,7 @@ export const PatientDashboard = () => {
                         <TableCell className="text-right px-8">
                           <button 
                             onClick={() => setSelectedAppointment(apt)}
-                            className="text-slate-400 hover:text-emerald-600 transition-colors p-2 hover:bg-emerald-50 rounded-full"
+                            className="text-muted-foreground hover:text-emerald-600 transition-colors p-2 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-full"
                           >
                             <ChevronRight className="h-5 w-5" />
                           </button>
@@ -193,33 +193,33 @@ export const PatientDashboard = () => {
         {/* Sidebar Sections */}
         <div className="lg:col-span-1 space-y-8">
            {/* Reports Section */}
-           <Card className="rounded-3xl border-slate-100 shadow-sm h-full">
-            <CardHeader className="border-b bg-slate-50/50 px-8 py-6">
-              <CardTitle className="text-xl font-bold">Medical Reports</CardTitle>
+           <Card className="rounded-3xl border-border shadow-sm h-full bg-card transition-colors">
+            <CardHeader className="border-b bg-muted/30 px-8 py-6">
+              <CardTitle className="text-xl font-bold text-foreground">Medical Reports</CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="flex flex-col gap-4">
                 {reports.length === 0 ? (
                   <div className="py-12 text-center">
-                    <FileText className="h-12 w-12 text-slate-200 mx-auto mb-4" />
-                    <p className="text-slate-500">No reports uploaded yet.</p>
+                    <FileText className="h-12 w-12 text-muted-foreground opacity-20 mx-auto mb-4" />
+                    <p className="text-muted-foreground">No reports uploaded yet.</p>
                   </div>
                 ) : (
                   reports.map((report) => (
-                    <div key={report.id} className="flex items-center gap-4 rounded-2xl border border-slate-100 p-4 hover:bg-slate-50 transition-colors cursor-pointer">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <div key={report.id} className="flex items-center gap-4 rounded-2xl border border-border p-4 hover:bg-muted/30 transition-all cursor-pointer group">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                         <FileText className="h-6 w-6" />
                       </div>
                       <div className="flex-1 overflow-hidden">
-                        <p className="font-semibold text-slate-900 truncate">{report.title}</p>
-                        <p className="text-xs text-slate-500">{new Date(report.uploadedAt).toLocaleDateString()}</p>
+                        <p className="font-semibold text-foreground truncate">{report.title}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(report.uploadedAt).toLocaleDateString()}</p>
                       </div>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
                           window.open(report.fileUrl, '_blank', 'noopener,noreferrer');
                         }}
-                        className="p-2 hover:bg-white rounded-lg transition-colors text-slate-400 hover:text-emerald-600"
+                        className="p-2 hover:bg-card rounded-lg transition-colors text-muted-foreground hover:text-emerald-600"
                         title="View Report"
                       >
                         <Eye className="h-5 w-5" />

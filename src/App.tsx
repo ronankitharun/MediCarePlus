@@ -6,6 +6,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '../components/ui/sonner';
 import { AuthProvider } from './AuthContext';
+import { ThemeProvider } from './ThemeContext';
 import { Navbar } from './components/Navbar';
 import { Home } from './components/Home';
 import { DoctorsListing } from './components/DoctorsListing';
@@ -16,10 +17,11 @@ import { Link } from 'react-router-dom';
 
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-slate-50 flex flex-col">
-          <Navbar />
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-background flex flex-col transition-colors duration-300">
+            <Navbar />
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<Home />} />
@@ -46,7 +48,8 @@ export default function App() {
         </div>
         <Toaster />
       </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

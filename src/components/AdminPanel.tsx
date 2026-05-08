@@ -291,34 +291,34 @@ export const AdminPanel = () => {
   if (!isAdmin) return <div className="p-20 text-center text-red-500 font-bold">Access Denied. Admin privileges required.</div>;
 
   return (
-    <div className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12 transition-colors duration-300">
       <div className="mb-12">
-        <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Admin <span className="text-emerald-600">Dashboard</span></h1>
-        <p className="text-slate-600 mt-2">Manage appointments, patients, and hospital operations.</p>
+        <h1 className="text-4xl font-bold text-foreground tracking-tight">Admin <span className="text-emerald-600">Dashboard</span></h1>
+        <p className="text-muted-foreground mt-2">Manage appointments, patients, and hospital operations.</p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-4">
         {/* Stats */}
         <div className="lg:col-span-4 grid gap-6 md:grid-cols-2">
-          <Card className="rounded-3xl border-slate-100 shadow-sm">
+          <Card className="rounded-3xl border-border bg-card shadow-sm transition-colors">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400">
                 <Users className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Total Patients</p>
-                <p className="text-2xl font-bold text-slate-900">{users.filter(u => u.role === 'patient').length}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Patients</p>
+                <p className="text-2xl font-bold text-foreground">{users.filter(u => u.role === 'patient').length}</p>
               </div>
             </CardContent>
           </Card>
-          <Card className="rounded-3xl border-slate-100 shadow-sm">
+          <Card className="rounded-3xl border-border bg-card shadow-sm transition-colors">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
                 <Calendar className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm font-medium text-slate-500">Total Appointments</p>
-                <p className="text-2xl font-bold text-slate-900">{appointments.length}</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Appointments</p>
+                <p className="text-2xl font-bold text-foreground">{appointments.length}</p>
               </div>
             </CardContent>
           </Card>
@@ -330,8 +330,8 @@ export const AdminPanel = () => {
             onClick={() => setActiveTab('appointments')}
             className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
               activeTab === 'appointments' 
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' 
-                : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-none' 
+                : 'bg-card text-muted-foreground border border-border hover:bg-muted/50'
             }`}
           >
             Appointments
@@ -340,8 +340,8 @@ export const AdminPanel = () => {
             onClick={() => setActiveTab('patients')}
             className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
               activeTab === 'patients' 
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' 
-                : 'bg-white text-slate-600 border border-slate-100 hover:bg-slate-50'
+                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-none' 
+                : 'bg-card text-muted-foreground border border-border hover:bg-muted/50'
             }`}
           >
             Patients & Reports
